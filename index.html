@@ -79,6 +79,18 @@ input,select,textarea{font-family:inherit}
 .vig{z-index:2}
 .grain{z-index:3;background-repeat:repeat;mix-blend-mode:overlay}
 .frame-l{z-index:6}
+.stk-layer{position:absolute;inset:0;overflow:hidden;pointer-events:none}
+#stkBack{z-index:4}
+#stkFront{z-index:7}
+.stk{position:absolute;user-select:none;-webkit-user-drag:none;cursor:move;pointer-events:auto;
+  transform-origin:center center;display:block}
+.stk.sel{outline:2px dashed rgba(200,164,92,.9);outline-offset:2px}
+.stk-item{display:flex;align-items:center;gap:8px;border:1px solid var(--line-2);padding:6px}
+.stk-item.on{border-color:var(--brass)}
+.stk-th{width:38px;height:38px;flex:0 0 auto;background-size:contain;background-repeat:no-repeat;
+  background-position:center;background-color:rgba(255,255,255,.05);cursor:pointer}
+.stk-item .lbl{flex:1;font-size:11px;color:var(--muted);cursor:pointer;overflow:hidden;white-space:nowrap}
+.stk-item button{background:var(--ink);border:1px solid var(--line);color:var(--muted);padding:4px 7px;font-size:11px}
 
 .sheet{position:absolute;inset:0;z-index:5;display:flex;flex-direction:column}
 .sheet-head{flex:0 0 auto}
@@ -244,7 +256,9 @@ table.gd code{display:inline-block;margin:1px 2px 1px 0}
         <div class="bg-overlay" id="bgOverlay"></div>
         <div class="vig" id="vigL"></div>
         <div class="grain" id="grain"></div>
+        <div class="stk-layer" id="stkBack"></div>
         <div class="frame-l" id="frameL"></div>
+        <div class="stk-layer" id="stkFront"></div>
         <div class="sheet" id="sheet">
           <header class="sheet-head" id="sheetHead"></header>
           <div class="sheet-body" id="sheetBody"></div>
@@ -266,7 +280,7 @@ table.gd code{display:inline-block;margin:1px 2px 1px 0}
 
   <div class="panel">
 
-    <div class="tabs" id="tabs"><button data-t="layout">판형</button><button data-t="script">원고</button><button data-t="speak">화자</button><button data-t="type">글자</button><button data-t="bg">배경</button><button data-t="deco">꾸밈</button><button data-t="out">내보내기</button></div>
+    <div class="tabs" id="tabs"><button data-t="layout">판형</button><button data-t="script">원고</button><button data-t="speak">화자</button><button data-t="type">글자</button><button data-t="bg">배경</button><button data-t="deco">꾸밈</button><button data-t="stk">스티커</button><button data-t="out">내보내기</button></div>
 <section class="pane" data-t="layout"><div class="sec-in">
         <div class="field"><label>형식</label>
           <div class="seg" id="modeSeg">
@@ -648,6 +662,33 @@ table.gd code{display:inline-block;margin:1px 2px 1px 0}
         <input type="file" id="importJson" accept="application/json" style="display:none">
         <button class="btn ghost" id="resetAll">처음으로 되돌리기</button>
       </div></section>
+<section class="pane" data-t="stk"><div class="sec-in">
+  <button class="btn" id="stkAdd">사진 넣기</button>
+  <input type="file" id="stkFile" accept="image/*" multiple style="display:none">
+  <p class="hint">넣은 뒤 미리보기에서 끌어서 옮깁니다. 여러 장 한 번에 넣을 수 있어요.</p>
+  <div id="stkList" style="display:flex;flex-direction:column;gap:6px"></div>
+  <div id="stkCtrl" style="display:none;flex-direction:column;gap:11px;border-top:1px solid var(--line);padding-top:12px">
+    <div class="field"><label>크기 <span class="v" id="stkWV">-</span></label>
+      <input type="range" id="stkW" min="20" max="1600" step="2"></div>
+    <div class="field"><label>회전 <span class="v" id="stkRotV">0°</span></label>
+      <input type="range" id="stkRot" min="-180" max="180" step="1"></div>
+    <div class="field"><label>투명도 <span class="v" id="stkOpV">100%</span></label>
+      <input type="range" id="stkOp" min=".05" max="1" step=".01"></div>
+    <div class="grid2">
+      <div class="field"><label>가로 위치 <span class="v" id="stkXV">0</span></label>
+        <input type="range" id="stkX" min="-600" max="2000" step="1"></div>
+      <div class="field"><label>세로 위치 <span class="v" id="stkYV">0</span></label>
+        <input type="range" id="stkY" min="-600" max="2000" step="1"></div>
+    </div>
+    <div class="field"><label>글자와의 순서</label>
+      <div class="seg" id="stkZSeg"><button data-v="back">글자 뒤</button><button data-v="front">글자 앞</button></div></div>
+    <div class="grid2">
+      <button class="btn ghost" id="stkFlip">좌우 뒤집기</button>
+      <button class="btn ghost" id="stkCenter">가운데로</button>
+    </div>
+    <button class="btn ghost" id="stkDel">이 스티커 지우기</button>
+  </div>
+</div></section>
 
 
   </div>
@@ -755,6 +796,17 @@ table.gd code{display:inline-block;margin:1px 2px 1px 0}
 <tr><td>덮개</td><td>배경 위에 색을 한 겹 덮어 글자를 읽기 쉽게 만듭니다</td></tr>
 </table>
 
+<div class="subhead">스티커 탭</div>
+<table class="gd">
+<tr><td>사진 넣기</td><td>여러 장을 한 번에 넣을 수 있습니다. 배경을 지운 PNG를 쓰면 깔끔합니다</td></tr>
+<tr><td>옮기기</td><td>미리보기에서 스티커를 끌어서 옮깁니다. 가로·세로 슬라이더로 미세 조정도 됩니다</td></tr>
+<tr><td>크기 · 회전 · 투명도</td><td>고른 스티커에만 적용됩니다. 목록에서 썸네일을 눌러 고릅니다</td></tr>
+<tr><td>글자와의 순서</td><td><b>글자 뒤</b>는 본문에 가려지고, <b>글자 앞</b>은 본문을 덮습니다</td></tr>
+<tr><td>겹침 순서</td><td>목록의 ▲▼로 스티커끼리의 앞뒤를 바꿉니다</td></tr>
+<tr><td>지우기</td><td>목록의 ✕ 또는 아래 버튼으로</td></tr>
+</table>
+<p class="hint">스티커는 모든 장에 똑같이 들어갑니다. 지면 밖으로 나간 부분은 잘립니다. 사진이 크면 프리셋 저장 공간이 금방 차니, 설정은 <b>파일로 내보내기</b>로 보관하는 게 좋습니다.</p>
+
 <div class="subhead">꾸밈 탭</div>
 <table class="gd">
 <tr><td>테두리</td><td>얇은 선 · 이중선 · 모서리 · 점선. 색과 안쪽 여백을 조절합니다</td></tr>
@@ -838,7 +890,12 @@ const GRADIENTS={
   '\uc0b4\ubcc4':['#FE2E4E','#F5893F','#CFFF4D'],
   '\uc6b4\uc131':['#061A73','#2E7E7A','#CFFF4D'],
   '\uc5fd\uc0ac':['#0E0E14','#3D6B91','#B0BFE0'],
-  '\uac15\uc124':['#3E2A24','#8E8A89','#EFC6CF']
+  '\uac15\uc124':['#3E2A24','#8E8A89','#EFC6CF'],
+  '\uaddc\ud788':['#FAC5CD','#D1CCE1','#A8D4F5'],
+  '\ub77c\uc2a4\ud2b8':['#ED7464','#F6B0A8','#FFF2F1'],
+  '\ud658\uc6d0':['#7A68A8','#5B5286','#474248'],
+  '\ubc31\uc628':['#2D5997','#93A8DC','#FFEEA3'],
+  '\ud55c\ud55c':['#183C64','#8799B4','#DFE7F7']
 };
 
 const dims=()=>S.ratio==='custom'?[S.cw,S.ch]:PRESETS[S.ratio];
@@ -872,7 +929,7 @@ const DEFAULTS=()=>({
   ovColor:'#0f0b14', ovOpacity:.3,
   frame:'none', frameColor:'#c8a45c', frameInset:28, vig:.35, grainAmt:0,
   sign:'', sign2:'', signSep:'\u00b7', signSepCustom:'', signColor:'#c8a45c', sepColor:'#c8a45c', signSize:.45, signAlign:'right', pageNum:'off',
-  scale:2, format:'png', quality:.92, transparent:false
+  scale:2, format:'png', quality:.92, transparent:false, stickers:[]
 });
 let S=DEFAULTS();
 let PAGES=[[]], PG=0, blurredURL=null;
@@ -1273,7 +1330,7 @@ function renderAll(){
   stage.style.width=W+'px';stage.style.height=H+'px';
   const sheet=$('sheet');sheet.style.padding=S.pad+'px';
   applyTypo(sheet);
-  renderBg();renderFrame();
+  renderBg();renderFrame();renderStickers();
   const blocks=parseScript(S.script);
   syncSpeakers(blocks);renderSpeakerList(blocks);
   PAGES=S.mode==='quote'?[blocks.filter(b=>b.t!=='break')]:paginate(blocks);
@@ -1585,6 +1642,7 @@ async function shoot(){
     onclone:doc=>{const s=doc.getElementById('stage');s.style.transform='none';s.style.position='relative';
       s.style.left='0';s.style.top='0';s.style.margin='0';
       const m=doc.getElementById('measure');if(m)m.remove();
+      doc.querySelectorAll('.stk').forEach(e=>{e.style.outline='none';e.classList.remove('sel');});
       if(S.transparent){['bgLayer','bgOverlay','vigL','grain'].forEach(k=>{const e=doc.getElementById(k);if(e)e.style.display='none';});}}});
 }
 const ext=()=>S.format==='jpeg'?'jpg':S.format;
@@ -1668,6 +1726,7 @@ function applyState(o){
   $('bgImageCtrl').style.display=S.bgMode==='image'?'block':'none';
   if(S.bgImage){$('bgThumb').style.backgroundImage=`url(${S.bgImage})`;$('thumbRow').style.display='flex';}
   else $('thumbRow').style.display='none';
+  S.stickers=S.stickers||[];STK_SEL=null;renderStkList();
   setScale(S.scale);buildGradChips();PG=0;applyBlur();renderAll();
 }
 function refreshPresets(){
@@ -1866,6 +1925,136 @@ async function saveStacked(){
 }
 $('btnSaveStack').addEventListener('click',saveStacked);
 
+
+/* ---------- 스티커 ---------- */
+let STK_SEL=null;
+function stkOf(id){return (S.stickers||[]).find(x=>x.id===id);}
+function renderStickers(){
+  const [W,H]=dims();
+  const back=$('stkBack'),front=$('stkFront');
+  back.innerHTML='';front.innerHTML='';
+  (S.stickers||[]).forEach(k=>{
+    const img=document.createElement('img');
+    img.className='stk'+(k.id===STK_SEL?' sel':'');
+    img.src=k.src;img.draggable=false;img.dataset.id=k.id;
+    img.style.left=k.x+'px';img.style.top=k.y+'px';
+    img.style.width=k.w+'px';img.style.height='auto';
+    img.style.opacity=k.op;
+    img.style.transform=`rotate(${k.rot}deg) scaleX(${k.flip?-1:1})`;
+    img.addEventListener('pointerdown',stkDragStart);
+    (k.z==='front'?front:back).appendChild(img);
+  });
+}
+function stkDragStart(e){
+  e.preventDefault();
+  const id=e.currentTarget.dataset.id,k=stkOf(id);
+  if(!k)return;
+  selectSticker(id);
+  const r=stage.getBoundingClientRect(),[W]=dims();
+  const scale=r.width/W||1;
+  const sx=e.clientX,sy=e.clientY,ox=k.x,oy=k.y;
+  const move=ev=>{
+    k.x=Math.round(ox+(ev.clientX-sx)/scale);
+    k.y=Math.round(oy+(ev.clientY-sy)/scale);
+    const el=document.querySelector(`.stk[data-id="${id}"]`);
+    if(el){el.style.left=k.x+'px';el.style.top=k.y+'px';}
+    if($('stkX')){$('stkX').value=k.x;$('stkXV').textContent=k.x;
+      $('stkY').value=k.y;$('stkYV').textContent=k.y;}
+  };
+  const up=()=>{window.removeEventListener('pointermove',move);window.removeEventListener('pointerup',up);histPush();};
+  window.addEventListener('pointermove',move);
+  window.addEventListener('pointerup',up);
+}
+function selectSticker(id){
+  STK_SEL=id;
+  const k=stkOf(id);
+  const c=$('stkCtrl');
+  if(!k){c.style.display='none';renderStickers();renderStkList();return;}
+  c.style.display='flex';
+  const [W,H]=dims();
+  const set=(i,v,t)=>{$(i).value=v;$(i+'V').textContent=t;};
+  $('stkW').max=Math.round(W*1.5);
+  $('stkX').min=-Math.round(W*.6);$('stkX').max=Math.round(W*1.4);
+  $('stkY').min=-Math.round(H*.6);$('stkY').max=Math.round(H*1.4);
+  set('stkW',k.w,k.w);set('stkRot',k.rot,k.rot+'\u00b0');
+  set('stkOp',k.op,Math.round(k.op*100)+'%');
+  set('stkX',k.x,k.x);set('stkY',k.y,k.y);
+  [...$('stkZSeg').children].forEach(b=>b.classList.toggle('active',b.dataset.v===k.z));
+  renderStickers();renderStkList();
+}
+function renderStkList(){
+  const box=$('stkList');box.innerHTML='';
+  (S.stickers||[]).forEach((k,i)=>{
+    const row=document.createElement('div');row.className='stk-item'+(k.id===STK_SEL?' on':'');
+    const th=document.createElement('div');th.className='stk-th';th.style.backgroundImage=`url(${k.src})`;
+    const lb=document.createElement('div');lb.className='lbl';
+    lb.textContent=`${i+1}번 · ${k.z==='front'?'글자 앞':'글자 뒤'}`;
+    const up=document.createElement('button');up.textContent='\u25b2';up.title='위로';
+    const dn=document.createElement('button');dn.textContent='\u25bc';dn.title='아래로';
+    const dl=document.createElement('button');dl.textContent='\u2715';
+    th.addEventListener('click',()=>selectSticker(k.id));
+    lb.addEventListener('click',()=>selectSticker(k.id));
+    up.addEventListener('click',()=>{if(i>0){const a=S.stickers;[a[i-1],a[i]]=[a[i],a[i-1]];renderStickers();renderStkList();}});
+    dn.addEventListener('click',()=>{const a=S.stickers;if(i<a.length-1){[a[i+1],a[i]]=[a[i],a[i+1]];renderStickers();renderStkList();}});
+    dl.addEventListener('click',()=>{S.stickers=S.stickers.filter(x=>x.id!==k.id);
+      if(STK_SEL===k.id)STK_SEL=null;selectSticker(STK_SEL);});
+    row.appendChild(th);row.appendChild(lb);row.appendChild(up);row.appendChild(dn);row.appendChild(dl);
+    box.appendChild(row);
+  });
+  $('stkCtrl').style.display=stkOf(STK_SEL)?'flex':'none';
+}
+$('stkAdd').addEventListener('click',()=>$('stkFile').click());
+$('stkFile').addEventListener('change',e=>{
+  const files=[...e.target.files];
+  if(!files.length)return;
+  const [W,H]=dims();
+  let done=0;
+  files.forEach((f,n)=>{
+    if(!f.type.startsWith('image/')){done++;return;}
+    const r=new FileReader();
+    r.onload=()=>{
+      const id='s'+Date.now()+'_'+n+Math.floor(Math.random()*999);
+      const w=Math.round(W*.28);
+      S.stickers=S.stickers||[];
+      S.stickers.push({id,src:r.result,x:Math.round(W/2-w/2)+n*24,y:Math.round(H/2-w/2)+n*24,
+        w,rot:0,op:1,flip:false,z:'front'});
+      done++;
+      if(done===files.length){selectSticker(S.stickers[S.stickers.length-1].id);toast('스티커를 넣었어요');}
+    };
+    r.readAsDataURL(f);
+  });
+  e.target.value='';
+});
+function stkBind(id,key,fmt){
+  const el=$(id);
+  el.addEventListener('input',()=>{
+    const k=stkOf(STK_SEL);if(!k)return;
+    const v=parseFloat(el.value);k[key]=v;
+    $(id+'V').textContent=fmt?fmt(v):v;
+    renderStickers();
+  });
+}
+stkBind('stkW','w');stkBind('stkRot','rot',v=>v+'\u00b0');
+stkBind('stkOp','op',v=>Math.round(v*100)+'%');
+stkBind('stkX','x');stkBind('stkY','y');
+$('stkZSeg').addEventListener('click',e=>{
+  const b=e.target.closest('button');if(!b)return;
+  const k=stkOf(STK_SEL);if(!k)return;
+  k.z=b.dataset.v;
+  [...$('stkZSeg').children].forEach(c=>c.classList.remove('active'));b.classList.add('active');
+  renderStickers();renderStkList();
+});
+$('stkFlip').addEventListener('click',()=>{const k=stkOf(STK_SEL);if(!k)return;k.flip=!k.flip;renderStickers();});
+$('stkCenter').addEventListener('click',()=>{
+  const k=stkOf(STK_SEL);if(!k)return;
+  const [W,H]=dims();k.x=Math.round(W/2-k.w/2);k.y=Math.round(H/2-k.w/2);
+  selectSticker(k.id);
+});
+$('stkDel').addEventListener('click',()=>{
+  if(!STK_SEL)return;
+  S.stickers=(S.stickers||[]).filter(x=>x.id!==STK_SEL);STK_SEL=null;selectSticker(null);
+});
+
 /* ---------- 가이드 ---------- */
 (function(){
   const m=$('guideModal');
@@ -1901,7 +2090,7 @@ $('modeHint').textContent=MODE_HINT[S.mode];
   [...$(id).children].forEach(c=>{let cv=c.dataset.v;if(cv==='on')cv=true;if(cv==='off')cv=false;
     c.classList.toggle('active',String(cv)===String(S[k]));});
 });
-setScale(S.scale);buildGradChips();renderAll();refreshPresets();refreshCasts();histInit();
+setScale(S.scale);buildGradChips();renderAll();renderStkList();refreshPresets();refreshCasts();histInit();
 window.addEventListener('resize',fitPreview);
 if(document.fonts)document.fonts.ready.then(()=>renderAll());
 
