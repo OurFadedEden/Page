@@ -943,7 +943,8 @@ function parseScript(t){
     if(/^#\s+/.test(line)){out.push({t:'head',text:line.replace(/^#\s+/,''),ln});last=null;return;}
     const nr=line.match(/^\*\*((?:(?!\*\*)[\s\S])+)\*\*$/)||line.match(/^\*((?:[^*])+)\*$/);
     if(nr){out.push({t:'narr',text:nr[1],forced:true,ln});return;}
-    if(S.quoteLine!=='off'&&QUOTED.test(line)){
+    const probe=line.replace(/^(?:==|~~|\*\*)+/,'');
+    if(S.quoteLine!=='off'&&QUOTED.test(probe)){
       if(S.quoteLine==='inherit'&&last){out.push({t:'say',who:last,text:line,anon:true,ln});return;}
       out.push({t:'line',text:line,ln});return;
     }
