@@ -82,7 +82,7 @@ input,select,textarea{font-family:inherit}
 .stk-layer{position:absolute;inset:0;overflow:hidden;pointer-events:none}
 #stkBack{z-index:4}
 #stkFront{z-index:7}
-.stk{position:absolute;user-select:none;-webkit-user-drag:none;cursor:move;pointer-events:auto;
+.stk{position:absolute;user-select:none;-webkit-user-drag:none;cursor:move;pointer-events:auto;touch-action:none;
   transform-origin:center center;display:block}
 .stk.sel{outline:2px dashed rgba(200,164,92,.9);outline-offset:2px}
 .stk-item{display:flex;align-items:center;gap:8px;border:1px solid var(--line-2);padding:6px}
@@ -1945,15 +1945,26 @@ function renderStickers(){
     (k.z==='front'?front:back).appendChild(img);
   });
 }
+let _lockY=0;
+function lockScroll(on){
+  const b=document.body;
+  if(on){_lockY=window.scrollY||0;b.style.position='fixed';b.style.top=(-_lockY)+'px';
+    b.style.left='0';b.style.right='0';b.style.width='100%';}
+  else{b.style.position='';b.style.top='';b.style.left='';b.style.right='';b.style.width='';
+    window.scrollTo(0,_lockY);}
+}
 function stkDragStart(e){
   e.preventDefault();
   const id=e.currentTarget.dataset.id,k=stkOf(id);
   if(!k)return;
+  try{e.currentTarget.setPointerCapture(e.pointerId);}catch(err){}
+  lockScroll(true);
   selectSticker(id);
   const r=stage.getBoundingClientRect(),[W]=dims();
   const scale=r.width/W||1;
   const sx=e.clientX,sy=e.clientY,ox=k.x,oy=k.y;
   const move=ev=>{
+    ev.preventDefault();
     k.x=Math.round(ox+(ev.clientX-sx)/scale);
     k.y=Math.round(oy+(ev.clientY-sy)/scale);
     const el=document.querySelector(`.stk[data-id="${id}"]`);
@@ -1961,9 +1972,15 @@ function stkDragStart(e){
     if($('stkX')){$('stkX').value=k.x;$('stkXV').textContent=k.x;
       $('stkY').value=k.y;$('stkYV').textContent=k.y;}
   };
-  const up=()=>{window.removeEventListener('pointermove',move);window.removeEventListener('pointerup',up);histPush();};
-  window.addEventListener('pointermove',move);
+  const up=()=>{
+    window.removeEventListener('pointermove',move);
+    window.removeEventListener('pointerup',up);
+    window.removeEventListener('pointercancel',up);
+    lockScroll(false);histPush();
+  };
+  window.addEventListener('pointermove',move,{passive:false});
   window.addEventListener('pointerup',up);
+  window.addEventListener('pointercancel',up);
 }
 function selectSticker(id){
   STK_SEL=id;
