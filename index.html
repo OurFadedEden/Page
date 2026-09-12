@@ -710,7 +710,7 @@ table.gd code{display:inline-block;margin:1px 2px 1px 0}
 <tr><td>프로필 크기</td><td>0으로 두면 모든 화자의 프로필이 사라집니다. 한 명만 없애려면 그 화자 카드에서 숨김을 고릅니다</td></tr>
 <tr><td>이름표</td><td>이름을 아예 안 보이게 할 수 있습니다</td></tr>
 <tr><td>지문 정렬</td><td>대화 판형의 지문을 왼쪽·가운데·오른쪽·양끝 중에 맞춥니다. 지문은 말풍선 없이 전체 폭을 씁니다</td></tr>
-<tr><td>화자 없는 대사 위치</td><td>따옴표만 쓴 대사를 어느 쪽에 놓을지. 왼쪽·오른쪽·가운데</td></tr>
+<tr><td>화자 없는 대사 위치</td><td>따옴표만 쓴 대사를 어느 쪽에 놓을지. 왼쪽·오른쪽·가운데. 프로필 자리를 비우지 않고 지문 선에 맞춰 붙습니다</td></tr>
 </table>
 
 <div class="subhead">글자 탭</div>
@@ -1018,7 +1018,6 @@ function talkEl(b){
     _prevWho=null;
     const sd=S.lineSide||'left';
     row.className='row '+sd;
-    if(S.avSize>0&&sd!=='center'){const sp2=document.createElement('div');sp2.style.cssText=`flex:0 0 auto;width:${S.avSize}px`;row.appendChild(sp2);}
     const st=document.createElement('div');st.className='stack';st.style.maxWidth=(S.bubMax||74)+'%';
     const bu=document.createElement('div');bu.className='bub';
     bu.innerHTML=inline(b.text);styleBub(bu,S.cDia,S.lineSide||'left');
