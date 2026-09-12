@@ -98,7 +98,7 @@ input,select,textarea{font-family:inherit}
 .b-say{margin:0 0 .55em}
 .b-name{opacity:.8;font-size:.72em;letter-spacing:.06em;margin-right:.5em}
 .dq{color:var(--c-dia)}
-.hl{background:var(--c-hl);border-radius:.12em;padding:0 .14em;box-decoration-break:clone;-webkit-box-decoration-break:clone}
+.hl{padding:.08em 0;box-decoration-break:clone;-webkit-box-decoration-break:clone}
 s{text-decoration-thickness:.06em;text-underline-offset:.1em}
 .b-narr i,.b-say i{font-style:italic;opacity:.9}
 .b-narr b,.b-say b{font-weight:700}
@@ -453,8 +453,14 @@ table.gd code{display:inline-block;margin:1px 2px 1px 0}
           <div class="seg" id="quoteFollowSeg">
             <button data-v="off">모두 왼쪽</button><button data-v="on">화자 위치 따라</button>
           </div></div>
+        <div class="field"><label>형광펜 모양</label>
+          <div class="seg" id="hlStyleSeg">
+            <button data-v="full">전체 칠</button><button data-v="marker">형광펜</button>
+            <button data-v="under">밑줄</button><button data-v="round">둥근 상자</button>
+            <button data-v="box">선 상자</button>
+          </div></div>
         <div class="grid3">
-          <div class="field"><label>형광펜</label><input type="color" id="cHl" value="#e8c98a"></div>
+          <div class="field"><label>형광펜 색</label><input type="color" id="cHl" value="#e8c98a"></div>
           <div class="field" style="grid-column:span 2"><label>형광펜 진하기 <span class="v" id="hlOpV">40%</span></label>
             <input type="range" id="hlOp" min=".05" max="1" step=".05" value=".4"></div>
         </div>
@@ -654,7 +660,7 @@ table.gd code{display:inline-block;margin:1px 2px 1px 0}
 <tr><td><code>**굵게**</code></td><td>굵은 글씨</td></tr>
 <tr><td><code>*기울임*</code></td><td>기울인 글씨</td></tr>
 <tr><td><code>~~취소선~~</code></td><td>가운데 줄</td></tr>
-<tr><td><code>==형광펜==</code></td><td>색 칠하기. 색과 진하기는 글자 탭에서</td></tr>
+<tr><td><code>==형광펜==</code></td><td>색 칠하기. 모양은 전체 칠·형광펜·밑줄·둥근 상자·선 상자 다섯 가지. 글자 탭에서 고릅니다</td></tr>
 <tr><td>따옴표</td><td>대사 색이 입혀집니다</td></tr>
 </table>
 <p class="hint">서로 겹쳐 써도 됩니다. <code>**==굵고 칠한==**</code> 처럼요. 제목, 부제, 소제목, 서명에서도 똑같이 씁니다.</p>
@@ -797,7 +803,7 @@ const DEFAULTS=()=>({
   titleRule:'bottom', ruleWeight:1.5, titleRuleWidth:100, signRuleWidth:100, signRule:'top', quoteLine:'inherit',
   titleRuleColor:'#efe7d8', signRuleColor:'#c8a45c',
   font:"'Ridibatang', serif", fsize:40, lh:1.8, ls:0, align:'left',
-  cText:'#efe7d8', cDia:'#e8c98a', cTitle:'#efe7d8', cSub:'#efe7d8', cHead:'#efe7d8', cHl:'#e8c98a', hlOp:.4, tsize:1.3, shadow:0,
+  cText:'#efe7d8', cDia:'#e8c98a', cTitle:'#efe7d8', cSub:'#efe7d8', cHead:'#efe7d8', cHl:'#e8c98a', hlOp:.4, hlStyle:'full', tsize:1.3, shadow:0,
   spk:{}, novelLabel:'none',
   bubRad:22, bubOp:.9, avSize:56, showName:true, bubBorder:true,
   bubStyle:'fill', diaColor:'fixed', quoteStyle:'plain', quoteFollowSide:false, lineSide:'left', talkNarrAlign:'center',
@@ -825,13 +831,46 @@ let _tt;function toast(m){const t=$('toast');t.textContent=m;t.classList.add('on
 const store={get(k){try{return JSON.parse(localStorage.getItem(k));}catch(e){return null;}},
   set(k,v){try{localStorage.setItem(k,JSON.stringify(v));return true;}catch(e){return false;}}};
 function esc(s){return String(s).replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));}
+function hlCss(bg,st,isFirst,isLast){
+  if(st==='marker')return `background:linear-gradient(to top, ${bg} 54%, transparent 54%)`;
+  if(st==='under')return `background:linear-gradient(to top, ${bg} 16%, transparent 16%)`;
+  if(st==='round'){
+    let r='';
+    if(isFirst)r+='border-top-left-radius:.45em;border-bottom-left-radius:.45em;padding-left:.2em;';
+    if(isLast)r+='border-top-right-radius:.45em;border-bottom-right-radius:.45em;padding-right:.2em;';
+    return `background:${bg};${r}`;
+  }
+  if(st==='box'){
+    const c=hexToRgba(S.cHl,Math.min(1,S.hlOp+.4));
+    let b=`border-top:1px solid ${c};border-bottom:1px solid ${c};`;
+    if(isFirst)b+=`border-left:1px solid ${c};padding-left:.2em;`;
+    if(isLast)b+=`border-right:1px solid ${c};padding-right:.2em;`;
+    return b;
+  }
+  return `background:${bg}`;
+}
+function hlWrap(t){
+  t=t.replace(/^\s+|\s+$/g,'');
+  const bg=hexToRgba(S.cHl,S.hlOp),st=S.hlStyle||'full';
+  const chunks=[];
+  t.split(/(<[^>]*>)/).forEach(p=>{
+    if(p==='')return;
+    if(p.charAt(0)==='<'){chunks.push({tag:true,v:p});return;}
+    (p.match(/\S+\s*|\s+/g)||[]).forEach(w=>chunks.push({tag:false,v:w}));
+  });
+  const texts=chunks.filter(c=>!c.tag);
+  if(!texts.length)return t;
+  const first=texts[0],last=texts[texts.length-1];
+  return chunks.map(c=>c.tag?c.v:
+    `<span class='hl' style='${hlCss(bg,st,c===first,c===last)}'>${c.v}</span>`).join('');
+}
 function inline(s){
   let h=esc(s);
   h=h.replace(/("[^"]*"|\u201c[^\u201d]*\u201d|\u300c[^\u300d]*\u300d|\u300e[^\u300f]*\u300f)/g,"<span class='dq'>$1</span>");
   h=h.replace(/\*\*([\s\S]+?)\*\*/g,'<b>$1</b>');
   h=h.replace(/~~([\s\S]+?)~~/g,'<s>$1</s>');
-  h=h.replace(/==([\s\S]+?)==/g,"<span class='hl' style='background:"+hexToRgba(S.cHl,S.hlOp)+"'>$1</span>");
   h=h.replace(/(^|[^*])\*([^*][\s\S]*?)\*(?!\*)/g,'$1<i>$2</i>');
+  h=h.replace(/==([\s\S]+?)==/g,(m,inner)=>hlWrap(inner));
   return h;
 }
 const QUOTED=/^["\u201c\u300c\u300e]/;
@@ -1363,6 +1402,7 @@ bindRange('bgBlur','bgBlur',v=>v,()=>applyBlur());
 
 bindColor('cText','cText');bindColor('cDia','cDia');bindColor('cTitle','cTitle');
 bindColor('cSub','cSub');bindColor('cHead','cHead');bindColor('cHl','cHl');
+bindSeg('hlStyleSeg','hlStyle');
 bindRange('hlOp','hlOp',v=>Math.round(v*100)+'%');
 bindColor('gradFrom','gradFrom');bindColor('gradMid','gradMid');bindColor('gradTo','gradTo');
 bindColor('bgSolid','bgSolid');bindColor('paperColor','paperColor');
@@ -1523,7 +1563,7 @@ function applyState(o){
     c.classList.toggle('active',String(cv)===String(val));});};
   seg('modeSeg',S.mode);seg('ratioSeg',S.ratio);seg('bodyYSeg',S.bodyY);seg('titleModeSeg',S.titleMode);seg('alignSeg',S.align);
   seg('novelLabelSeg',S.novelLabel);seg('showNameSeg',S.showName);seg('bubBorderSeg',S.bubBorder);
-  seg('bubStyleSeg',S.bubStyle);seg('diaColorSeg',S.diaColor);seg('quoteStyleSeg',S.quoteStyle);seg('quoteFollowSeg',S.quoteFollowSide);seg('lineSideSeg',S.lineSide);seg('talkNarrAlignSeg',S.talkNarrAlign);
+  seg('bubStyleSeg',S.bubStyle);seg('diaColorSeg',S.diaColor);seg('quoteStyleSeg',S.quoteStyle);seg('quoteFollowSeg',S.quoteFollowSide);seg('hlStyleSeg',S.hlStyle);seg('lineSideSeg',S.lineSide);seg('talkNarrAlignSeg',S.talkNarrAlign);
   seg('frameSeg',S.frame);seg('signAlignSeg',S.signAlign);seg('pageNumSeg',S.pageNum);
   seg('titleRuleSeg',S.titleRule);seg('signRuleSeg',S.signRule);seg('quoteLineSeg',S.quoteLine);seg('signSepSeg',S.signSep);
   $('sepCustomField').style.display=S.signSep==='custom'?'flex':'none';
@@ -1754,7 +1794,7 @@ $('modeHint').textContent=MODE_HINT[S.mode];
  'showNameSeg:showName','bubBorderSeg:bubBorder','frameSeg:frame','signAlignSeg:signAlign',
  'pageNumSeg:pageNum','formatSeg:format','bgModeSeg:bgMode','titleRuleSeg:titleRule',
  'signRuleSeg:signRule','quoteLineSeg:quoteLine','signSepSeg:signSep','transSeg:transparent','bubStyleSeg:bubStyle','diaColorSeg:diaColor',
- 'quoteStyleSeg:quoteStyle','quoteFollowSeg:quoteFollowSide','lineSideSeg:lineSide','talkNarrAlignSeg:talkNarrAlign'].forEach(p=>{
+ 'quoteStyleSeg:quoteStyle','quoteFollowSeg:quoteFollowSide','hlStyleSeg:hlStyle','lineSideSeg:lineSide','talkNarrAlignSeg:talkNarrAlign'].forEach(p=>{
   const [id,k]=p.split(':');
   [...$(id).children].forEach(c=>{let cv=c.dataset.v;if(cv==='on')cv=true;if(cv==='off')cv=false;
     c.classList.toggle('active',String(cv)===String(S[k]));});
