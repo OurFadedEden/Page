@@ -895,7 +895,8 @@ const GRADIENTS={
   '\ub77c\uc2a4\ud2b8':['#ED7464','#F6B0A8','#FFF2F1'],
   '\ud658\uc6d0':['#7A68A8','#5B5286','#474248'],
   '\ubc31\uc628':['#2D5997','#93A8DC','#FFEEA3'],
-  '\ud55c\ud55c':['#183C64','#8799B4','#DFE7F7']
+  '\ud55c\ud55c':['#183C64','#8799B4','#DFE7F7'],
+  '\ubc31\ub828':['#9C2BAF','#A0165E','#97020C']
 };
 
 const dims=()=>S.ratio==='custom'?[S.cw,S.ch]:PRESETS[S.ratio];
@@ -1259,9 +1260,19 @@ function measureBlocks(blocks){
   const els=blocks.map(b=>b.t==='break'?null:blockEl(b));
   els.forEach(e=>{if(e)m.appendChild(e);});
   const hs=els.map(e=>{if(!e)return 0;const cs=getComputedStyle(e);
-    return e.offsetHeight+parseFloat(cs.marginBottom||0)+parseFloat(cs.marginTop||0);});
+    return e.getBoundingClientRect().height+parseFloat(cs.marginBottom||0)+parseFloat(cs.marginTop||0);});
   m.innerHTML='';
   return hs;
+}
+function pageHeight(blocks){
+  const [W]=dims();
+  const m=$('measure');
+  m.style.width=(W-S.pad*2)+'px';
+  applyTypo(m);m.innerHTML='';_prevWho=null;
+  blocks.forEach(b=>{const e=blockEl(b);if(e)m.appendChild(e);});
+  const h=m.getBoundingClientRect().height;
+  m.innerHTML='';_prevWho=null;
+  return h;
 }
 function paginate(blocks){
   const [W,H]=dims();
@@ -1285,12 +1296,23 @@ function paginate(blocks){
   });
   while(cur.length&&cur[cur.length-1].t==='blank')cur.pop();
   if(cur.length)pages.push(cur);
-  return pages.length?pages:[[]];
+  if(!pages.length)return [[]];
+  for(let i=0;i<pages.length;i++){
+    let guard=0;
+    while(pages[i].length>1&&pageHeight(pages[i])>avail(i)-2&&guard++<300){
+      const last=pages[i].pop();
+      while(pages[i].length&&pages[i][pages[i].length-1].t==='blank')pages[i].pop();
+      if(!pages[i+1])pages.push([]);
+      pages[i+1].unshift(last);
+    }
+    if(pages[i+1]&&!pages[i+1].length)pages.splice(i+1,1);
+  }
+  return pages.filter(p=>p.length).length?pages.filter(p=>p.length):[[]];
 }
 function fitQuote(body,wrap){
   wrap.style.fontSize='';
   let k=1;
-  for(let n=0;n<40&&wrap.scrollHeight>body.clientHeight&&k>.42;n++){k-=.025;wrap.style.fontSize=(S.fsize*k)+'px';}
+  for(let n=0;n<60&&wrap.scrollHeight>body.clientHeight+1&&k>.28;n++){k-=.02;wrap.style.fontSize=(S.fsize*k)+'px';}
 }
 function renderPage(i){
   const total=PAGES.length;
