@@ -288,6 +288,7 @@ table.gd code{display:inline-block;margin:1px 2px 1px 0}
             <button data-v="talk">대화</button>
             <button data-v="novel">내지</button>
             <button data-v="log">로그</button>
+            <button data-v="genko">원고지</button>
           </div>
         </div>
         <p class="hint" id="modeHint"></p>
@@ -311,6 +312,34 @@ table.gd code{display:inline-block;margin:1px 2px 1px 0}
             <button class="btn" id="ratioApply" style="width:auto;padding:7px 12px">맞추기</button>
           </div>
           <p class="hint" style="margin-top:7px">비율을 넣으면 긴 쪽을 1200px에 맞춰 계산해요. 200~4000px까지 돼요.</p>
+        </div>
+        <div id="gkCtrl" style="display:none;flex-direction:column;gap:11px;border:1px solid var(--line-2);padding:10px">
+          <div class="subhead" style="margin-top:0">원고지 설정</div>
+          <div class="field"><label>칸 크기 기준</label>
+            <div class="seg" id="gkBaseSeg">
+              <button data-v="cols">칸 수로</button><button data-v="fsize">글자 크기로</button></div></div>
+          <div class="field" id="gkColsField"><label>한 줄 칸 수 <span class="v" id="gkColsV">20</span></label>
+            <input type="range" id="gkCols" min="8" max="30" step="1" value="20"></div>
+          <p class="hint" id="gkBaseHint"></p>
+          <div class="field"><label>문단 들여쓰기 <span class="v" id="gkIndentV">1칸</span></label>
+            <input type="range" id="gkIndent" min="0" max="4" step="1" value="1"></div>
+          <div class="field"><label>대사도 들여쓸까요</label>
+            <div class="seg" id="gkIndentSaySeg">
+              <button data-v="on">들여씀</button><button data-v="off">안 들여씀</button></div></div>
+          <div class="field"><label>줄 사이 <span class="v" id="gkGapV">14</span></label>
+            <input type="range" id="gkGap" min="0" max="60" step="2" value="14"></div>
+          <div class="grid2">
+            <div class="field"><label>칸 선 색</label><input type="color" id="gkColor" value="#c8a45c"></div>
+            <div class="field"><label>칸 선 진하기 <span class="v" id="gkOpV">35%</span></label>
+              <input type="range" id="gkOp" min=".05" max="1" step=".01" value=".35"></div>
+          </div>
+          <div class="grid2">
+            <div class="field"><label>선 굵기 <span class="v" id="gkLineV">1</span></label>
+              <input type="range" id="gkLine" min=".5" max="4" step=".5" value="1"></div>
+            <div class="field"><label>글자 크기 <span class="v" id="gkScaleV">0.78×</span></label>
+              <input type="range" id="gkScale" min=".4" max="1" step=".02" value=".78"></div>
+          </div>
+          <p class="hint">칸 크기는 비율과 여백, 칸 수로 자동 계산돼요. 줄 수는 지면에 들어가는 만큼 채우고 넘치면 다음 장으로 넘어갑니다.</p>
         </div>
         <div class="field"><label>본문 세로 위치</label>
           <div class="seg" id="bodyYSeg">
@@ -556,6 +585,7 @@ table.gd code{display:inline-block;margin:1px 2px 1px 0}
           </div>
         </div>
 
+        <div class="subhead">덮개</div>
         <div class="grid2" style="margin-top:4px">
           <div class="field"><label>덮개 색</label><input type="color" id="ovColor" value="#0f0b14"></div>
           <div class="field"><label>덮개 <span class="v" id="ovOpacityV">30%</span></label>
@@ -573,6 +603,56 @@ table.gd code{display:inline-block;margin:1px 2px 1px 0}
           <div class="field"><label>안쪽 여백 <span class="v" id="frameInsetV">28</span></label>
             <input type="range" id="frameInset" min="6" max="120" step="2" value="28"></div>
         </div>
+        <div class="subhead">모서리 장식</div>
+        <div class="field"><label>기호</label>
+          <div class="seg" id="cornerSeg">
+            <button data-v="none">없음</button>
+            <button data-v="◆">◆</button><button data-v="❖">❖</button>
+            <button data-v="✦">✦</button><button data-v="✧">✧</button>
+            <button data-v="❋">❋</button><button data-v="·">·</button>
+            <button data-v="custom">직접</button>
+          </div></div>
+        <div class="field" id="cornerCustomField" style="display:none"><label>직접 쓸 기호</label>
+          <input type="text" id="cornerCustom" maxlength="4" placeholder="예: ⟡"></div>
+        <div class="grid2">
+          <div class="field"><label>장식 색</label><input type="color" id="cornerColor" value="#c8a45c"></div>
+          <div class="field"><label>크기 <span class="v" id="cornerSizeV">0.60×</span></label>
+            <input type="range" id="cornerSize" min=".2" max="2" step=".05" value=".6"></div>
+        </div>
+        <div class="field"><label>모서리에서 떨어진 거리 <span class="v" id="cornerInsetV">44</span></label>
+          <input type="range" id="cornerInset" min="8" max="200" step="2" value="44"></div>
+
+        <div class="subhead">장면 구분</div>
+        <p class="hint">본문에 <code>***</code> 만 있는 줄을 넣으면 장을 나누지 않고 장면만 끊어줍니다.</p>
+        <div class="field"><label>기호</label>
+          <div class="seg" id="dividerSeg">
+            <button data-v="❧">❧</button><button data-v="❋">❋</button>
+            <button data-v="⁂">⁂</button><button data-v="···">···</button>
+            <button data-v="✦">✦</button><button data-v="—">—</button>
+            <button data-v="custom">직접</button>
+          </div></div>
+        <div class="field" id="dividerCustomField" style="display:none"><label>직접 쓸 기호</label>
+          <input type="text" id="dividerCustom" maxlength="8" placeholder="예: · ✦ ·"></div>
+        <div class="grid2">
+          <div class="field"><label>색</label><input type="color" id="dividerColor" value="#c8a45c"></div>
+          <div class="field"><label>크기 <span class="v" id="dividerSizeV">0.70×</span></label>
+            <input type="range" id="dividerSize" min=".2" max="2" step=".05" value=".7"></div>
+        </div>
+        <div class="field"><label>위아래 여백 <span class="v" id="dividerGapV">1.00×</span></label>
+          <input type="range" id="dividerGap" min="0" max="3" step=".1" value="1"></div>
+
+        <div class="subhead">첫 글자 크게</div>
+        <div class="field"><label>적용</label>
+          <div class="seg" id="dropcapSeg">
+            <button data-v="off">안 함</button><button data-v="first">첫 장만</button>
+            <button data-v="all">모든 장</button></div></div>
+        <div class="grid2">
+          <div class="field"><label>높이 <span class="v" id="dropcapLinesV">3</span></label>
+            <input type="range" id="dropcapLines" min="2" max="5" step=".5" value="3"></div>
+          <div class="field"><label>색</label><input type="color" id="dropcapColor" value="#e8c98a"></div>
+        </div>
+
+        <div class="subhead">질감</div>
         <div class="grid2">
           <div class="field"><label>비네트 <span class="v" id="vigV">35%</span></label>
             <input type="range" id="vig" min="0" max="1" step=".02" value=".35"></div>
@@ -620,6 +700,11 @@ table.gd code{display:inline-block;margin:1px 2px 1px 0}
         <div class="field"><label>서명 구분선</label>
           <div class="seg" id="signRuleSeg">
             <button data-v="none">없음</button><button data-v="top">위</button></div></div>
+        <div class="field"><label>서명선 기준</label>
+          <div class="seg" id="signRuleScopeSeg">
+            <button data-v="page">지면 너비</button><button data-v="sign">서명 너비</button></div></div>
+        <div class="field"><label>서명선 좌우 미세 이동 <span class="v" id="signRuleXV">0</span></label>
+          <input type="range" id="signRuleX" min="-120" max="120" step="1" value="0"></div>
         <div class="grid2">
           <div class="field"><label>제목선 색</label><input type="color" id="titleRuleColor" value="#efe7d8"></div>
           <div class="field"><label>제목선 길이 <span class="v" id="titleRuleWidthV">100%</span></label>
@@ -720,6 +805,7 @@ table.gd code{display:inline-block;margin:1px 2px 1px 0}
 <tr><td><code>*지문*</code><br><code>**지문**</code></td><td>줄 전체를 감싸면 안에 따옴표가 있어도 지문으로 못박고 기울입니다</td></tr>
 <tr><td><code># 소제목</code></td><td>본문 안의 소제목. 우물 정 뒤에 띄어쓰기가 필요합니다</td></tr>
 <tr><td><code>---</code></td><td>여기서 장을 끊습니다. 줄 하나에 줄표만 세 개 이상</td></tr>
+<tr><td><code>***</code></td><td>장은 그대로 두고 장면만 끊습니다. 가운데에 장식 기호가 들어갑니다</td></tr>
 <tr><td>빈 줄</td><td>문단 사이 간격. 장이 바뀌는 자리의 빈 줄은 자동으로 정리됩니다</td></tr>
 </table>
 
@@ -739,6 +825,7 @@ table.gd code{display:inline-block;margin:1px 2px 1px 0}
 <tr><td>대화</td><td>메신저 말풍선. 화자별 색·좌우·프로필을 쓰고, 같은 사람이 연달아 말하면 프로필과 이름표를 생략합니다. 지문은 말풍선 없이 전체 폭으로 깔립니다</td></tr>
 <tr><td>내지</td><td>소설 지면. 대사는 따옴표와 색으로만 구분하고, 분량이 넘치면 여러 장으로 나눕니다</td></tr>
 <tr><td>로그</td><td><code>[이름] 대사</code> 형태로 한 줄씩 쌓입니다. 상태창이나 기록물 느낌</td></tr>
+<tr><td>원고지</td><td>한 글자가 한 칸에 들어갑니다. 칸 크기는 <b>칸 수로</b> 정하거나 <b>글자 크기로</b> 정합니다. 문단 들여쓰기는 0~4칸 중에 고르고 대사만 따로 뺄 수도 있습니다. 줄 끝에 오는 마침표·닫는 따옴표는 마지막 칸에 같이 넣습니다. 칸 수만 정하면 칸 크기와 줄 수는 지면에 맞춰 자동으로 잡힙니다. 굵게·기울임·취소선·형광펜은 글자별로 적용되고, 말풍선과 프로필은 쓰이지 않습니다</td></tr>
 </table>
 
 <div class="subhead">판형 탭</div>
@@ -810,12 +897,15 @@ table.gd code{display:inline-block;margin:1px 2px 1px 0}
 <div class="subhead">꾸밈 탭</div>
 <table class="gd">
 <tr><td>테두리</td><td>얇은 선 · 이중선 · 모서리 · 점선. 색과 안쪽 여백을 조절합니다</td></tr>
+<tr><td>모서리 장식</td><td>네 귀퉁이에 기호를 얹습니다. 색·크기·모서리에서 떨어진 거리를 조절합니다</td></tr>
+<tr><td>장면 구분</td><td><code>***</code> 줄에 들어갈 기호를 고릅니다. 일곱 가지와 직접 입력</td></tr>
+<tr><td>첫 글자 크게</td><td>첫 문단의 첫 글자를 두세 줄 높이로 키웁니다. 첫 장만 또는 모든 장</td></tr>
 <tr><td>비네트 · 노이즈</td><td>가장자리 어둡게, 오래된 인쇄물 같은 입자</td></tr>
 <tr><td>서명</td><td>아이디와 작품명을 따로 넣고 사이에 꾸밈 기호를 고릅니다. 기호는 열두 가지와 직접 입력. 한쪽을 비우면 기호도 안 나옵니다</td></tr>
 <tr><td>서명 크기 · 위치</td><td>본문 크기의 몇 배로 할지, 왼쪽·가운데·오른쪽 어디에 둘지. 쪽번호는 반대쪽에 붙습니다</td></tr>
 <tr><td>서명 미세 이동</td><td>좌우·위아래로 픽셀 단위로 밀 수 있습니다. 제목도 원고 탭에서 위아래로 밉니다</td></tr>
 <tr><td>서명 · 꾸밈 색</td><td>글자 색과 기호 색을 따로 잡습니다</td></tr>
-<tr><td>구분선</td><td>제목선과 서명선의 색·길이를 각각 잡습니다. 굵기만 함께 씁니다</td></tr>
+<tr><td>구분선</td><td>제목선과 서명선의 색·길이를 각각 잡습니다. 굵기만 함께 씁니다. 서명선은 <b>지면 너비</b>로 길게 긋거나 <b>서명 너비</b>에 딱 맞출 수 있고, 끝이 안 맞으면 좌우로 미세 이동시킵니다</td></tr>
 <tr><td>쪽번호</td><td>없음 · <code>1</code> · <code>1 / 3</code> · <code>— 1 —</code></td></tr>
 </table>
 
@@ -905,11 +995,14 @@ const GRADIENTS={
 
 const dims=()=>S.ratio==='custom'?[S.cw,S.ch]:PRESETS[S.ratio];
 
+const GK_CLOSE=/[.,!?;:)\]\u300d\u300f\u201d\u2019\u00b7\u2026\u3001\u3002\uff01\uff1f\uff09\'"]/;
+
 const MODE_HINT={
   quote:'한 장짜리 발췌 이미지. 본문이 넘치면 자동으로 줄여 맞춰요.',
   talk:'메신저 말풍선. 화자 탭에서 좌·우·가운데와 색을 정해요.',
   novel:'소설 내지. 분량이 넘치면 여러 장으로 자동으로 나눠요.',
-  log:'한 줄씩 쌓이는 로그. 상태창·기록물 느낌에 맞아요.'
+  log:'한 줄씩 쌓이는 로그. 상태창·기록물 느낌에 맞아요.',
+  genko:'실제 원고지처럼 한 글자씩 칸에 넣어요. 칸 수만 정하면 나머지는 자동이에요.'
 };
 
 const SAMPLE=`# \uc18c\uc81c\ubaa9\uc740 \uc774\ub807\uac8c\n\n@\ud654\uc790A: \uc774\ub984 \uc55e\uc5d0 @ \ub97c \ubd99\uc774\uace0 \ucf5c\ub860\uc744 \ucc0d\uc73c\uba74 \ub300\uc0ac\uac00 \ub3fc\uc694.\n@\ud654\uc790B: \uc774\ub984\uc740 \uba87 \uba85\uc774\ub4e0 \uad1c\ucc2e\uc544\uc694.\n\n\"\ub530\uc634\ud45c\ub85c \uc2dc\uc791\ud558\uba74 \uc774\ub984 \uc5c6\uc774\ub3c4 \ub300\uc0ac\uac00 \ub3fc\uc694.\"\n\n\uadf8\ub0e5 \uc4f4 \uc904\uc740 \uc9c0\ubb38\uc774 \ub3fc\uc694. **\uad75\uac8c** \ub098 *\uae30\uc6b8\uc784* \ub3c4 \uc4f8 \uc218 \uc788\uc5b4\uc694.\n\n---\n\n@\ud654\uc790A: \uc904\ud45c \uc138 \uac1c\ub97c \ub123\uc73c\uba74 \uac70\uae30\uc11c \uc7a5\uc744 \ub098\ub220\uc694.\n\n\ubd84\ub7c9\uc774 \ub118\uce58\uba74 \uc54c\uc544\uc11c \ub2e4\uc74c \uc7a5\uc73c\ub85c \ub118\uc5b4\uac11\ub2c8\ub2e4.`;
@@ -920,7 +1013,7 @@ const DEFAULTS=()=>({
   mode:'quote', ratio:'1:1', cw:1080, ch:1350, pad:72, bodyY:'top',
   title:'', subtitle:'', titleMode:'first', script:SAMPLE,
   titleRule:'bottom', ruleWeight:1.5, titleRuleWidth:100, signRuleWidth:100, signRule:'top', quoteLine:'inherit',
-  titleRuleColor:'#efe7d8', signRuleColor:'#c8a45c',
+  titleRuleColor:'#efe7d8', signRuleColor:'#c8a45c', signRuleScope:'page', signRuleX:0,
   font:"'Ridibatang', serif", fsize:40, lh:1.8, ls:0, align:'left',
   cText:'#efe7d8', cDia:'#e8c98a', cTitle:'#efe7d8', cSub:'#efe7d8', cHead:'#efe7d8', cHl:'#e8c98a', hlOp:.4, hlStyle:'full', strokeW:0, strokeColor:'#000000',
   titleY:0, signX:0, signY:0, barMode:'auto', barColor:'#c8a45c', tsize:1.3, shadow:0,
@@ -932,7 +1025,11 @@ const DEFAULTS=()=>({
   paperColor:'#efe7d8', paperGrain:.4,
   bgImage:null, bgBlur:0, bgPosX:50, bgPosY:50, bgZoom:100,
   ovColor:'#0f0b14', ovOpacity:.3,
-  frame:'none', frameColor:'#c8a45c', frameInset:28, vig:.35, grainAmt:0,
+  gkBase:'cols', gkCols:20, gkGap:14, gkIndent:1, gkIndentSay:true, gkLine:1, gkColor:'#c8a45c', gkOp:.35, gkScale:.78,
+  frame:'none', frameColor:'#c8a45c', frameInset:28,
+  cornerMark:'none', cornerCustom:'', cornerColor:'#c8a45c', cornerSize:.6, cornerInset:44,
+  dividerMark:'\u2767', dividerCustom:'', dividerColor:'#c8a45c', dividerSize:.7, dividerGap:1,
+  dropcap:'off', dropcapLines:3, dropcapColor:'#e8c98a', vig:.35, grainAmt:0,
   sign:'', sign2:'', signSep:'\u00b7', signSepCustom:'', signColor:'#c8a45c', sepColor:'#c8a45c', signSize:.45, signAlign:'right', pageNum:'off',
   scale:2, format:'png', quality:.92, transparent:false, stickers:[]
 });
@@ -1022,6 +1119,7 @@ function parseScript(t){
     const m=line.match(/^@([^:\uff1a]{1,24})[:\uff1a]\s*(.*)$/);
     if(m){last=m[1].trim();out.push({t:'say',who:last,text:m[2],ln});return;}
     if(/^#\s+/.test(line)){out.push({t:'head',text:line.replace(/^#\s+/,''),ln});last=null;return;}
+    if(/^\*{3,}$/.test(line)||/^[\u00b7\u2022]{3,}$/.test(line)){out.push({t:'div',ln});return;}
     const nr=line.match(/^\*\*((?:(?!\*\*)[\s\S])+)\*\*$/)||line.match(/^\*((?:[^*])+)\*$/);
     if(nr){out.push({t:'narr',text:nr[1],forced:true,ln});return;}
     const probe=line.replace(/^(?:==|~~|\*\*)+/,'');
@@ -1071,6 +1169,14 @@ let _prevWho=null;
 function blockEl(b){
   const d=document.createElement('div');
   if(b.t==='blank'){_prevWho=null;d.className='b-blank';return d;}
+  if(b.t==='div'){
+    _prevWho=null;
+    const ch=S.dividerMark==='custom'?(S.dividerCustom||'\u2767'):S.dividerMark;
+    d.className='b-div';
+    d.style.cssText=`text-align:center;color:${S.dividerColor};font-size:${Math.round(S.fsize*S.dividerSize)}px;`+
+      `margin:${Math.round(S.fsize*S.dividerGap)}px 0;letter-spacing:.4em;line-height:1;opacity:.9`;
+    d.textContent=ch;return d;
+  }
   if(b.t==='head'){_prevWho=null;d.className='b-head';d.innerHTML=inline(b.text);d.style.color=S.cHead;return d;}
   if(S.mode==='talk')return talkEl(b);
   if(S.mode==='log')return logEl(b);
@@ -1216,10 +1322,20 @@ function footHTML(pageIdx,total){
   }
   const sign=hasSign?`<span class="s-sign" style="color:${S.signColor}">${signHTML}</span>`:'<span></span>';
   const pg=hasNum?`<span class="s-page" style="color:${S.signColor}">${num}</span>`:'<span></span>';
-  const order=S.signAlign==='right'?pg+sign:sign+pg;
   const just=S.signAlign==='center'?'center':'space-between';
-  const rule=S.signRule!=='none'?ruleHTML(S.signRuleColor,S.signAlign,0,Math.round(fs*.75),S.signRuleWidth):'';
-  return `<div style="padding-top:${Math.round(S.fsize*.8)}px;position:relative;left:${S.signX||0}px;top:${S.signY||0}px">${rule}<div class="s-foot" style="font-size:${fs}px;font-family:${S.font};justify-content:${just};gap:${Math.round(fs*1.2)}px">${order}</div></div>`;
+  const align=S.signAlign==='center'?'center':(S.signAlign==='right'?'flex-end':'flex-start');
+  const gap=Math.round(fs*1.2);
+  const wrap=b=>`<div style="padding-top:${Math.round(S.fsize*.8)}px;position:relative;left:${S.signX||0}px;top:${S.signY||0}px">${b}</div>`;
+  const row=b=>`<div class="s-foot" style="font-size:${fs}px;font-family:${S.font};justify-content:${just};gap:${gap}px">${b}</div>`;
+  if(S.signRule!=='none'&&S.signRuleScope==='sign'&&hasSign){
+    const col=`<span style="display:inline-flex;flex-direction:column;align-items:${align};min-width:0">`
+      +ruleHTML(S.signRuleColor,'left',0,Math.round(fs*.7),S.signRuleWidth)+sign+`</span>`;
+    return wrap(row(S.signAlign==='right'?pg+col:col+pg));
+  }
+  const rule=S.signRule!=='none'
+    ?`<div style="position:relative;left:${S.signRuleX||0}px">`+ruleHTML(S.signRuleColor,S.signAlign,0,Math.round(fs*.75),S.signRuleWidth)+`</div>`
+    :'';
+  return wrap(rule+row(S.signAlign==='right'?pg+sign:sign+pg));
 }
 
 /* ---------- 화면 ---------- */
@@ -1242,6 +1358,118 @@ function renderBg(){
   const v=$('vigL');
   v.style.background=S.vig>0?`radial-gradient(120% 100% at 50% 50%, transparent 36%, rgba(0,0,0,${S.vig}) 100%)`:'none';
 }
+function styledChars(t){
+  const out=[];let b=false,i=false,st=false,hl=false;
+  for(let k=0;k<t.length;k++){
+    if(t.startsWith('**',k)){b=!b;k++;continue;}
+    if(t.startsWith('~~',k)){st=!st;k++;continue;}
+    if(t.startsWith('==',k)){hl=!hl;k++;continue;}
+    if(t[k]==='*'){i=!i;continue;}
+    out.push({c:t[k],b:b,i:i,s:st,h:hl});
+  }
+  return out;
+}
+function genkoRows(blocks){
+  const cols=gkMetrics().cols;
+  const rows=[];
+  blocks.forEach(b=>{
+    if(b.t==='break'){rows.push({br:true});return;}
+    if(b.t==='blank'){rows.push({cells:[]});return;}
+    if(b.t==='div'){rows.push({div:true});return;}
+    let text=b.text||'';
+    const isSay=(b.t==='say'||b.t==='line');
+    let color=S.cText;
+    let indent=isSay?(S.gkIndentSay?S.gkIndent:0):S.gkIndent;
+    indent=Math.max(0,Math.min(6,Math.round(indent)));
+    if(b.t==='say'||b.t==='line'){
+      color=(S.diaColor==='speaker'&&b.who)?spkOf(b.who).color:S.cDia;
+      if(!QUOTED.test(text.replace(/^(?:==|~~|\*\*)+/,'')))text='"'+text+'"';
+      if(S.novelLabel==='inline'&&b.t==='say'&&!b.anon)text=b.who+' '+text;
+    }
+    if(b.t==='head'){color=S.cHead;}
+    const chars=styledChars(text);
+    let cur=[];
+    for(let n=0;n<indent;n++)cur.push(null);
+    chars.forEach(ch=>{
+      if(cur.length>=cols){
+        const last=cur[cur.length-1];
+        if(GK_CLOSE.test(ch.c)&&last&&!last.extra){last.extra=ch;return;}
+        rows.push({cells:cur,color:color});cur=[];
+      }
+      cur.push(ch);
+    });
+    if(cur.length>indent||chars.length)rows.push({cells:cur,color:color});
+  });
+  return rows;
+}
+function gkMetrics(){
+  const [W]=dims();
+  const inner=W-S.pad*2;
+  if(S.gkBase==='fsize'){
+    const size=Math.max(10,Math.round(S.fsize/Math.max(.3,S.gkScale)));
+    return {size:size,cols:Math.max(1,Math.floor(inner/size))};
+  }
+  const cols=Math.max(4,Math.round(S.gkCols));
+  return {size:Math.floor(inner/cols),cols:cols};
+}
+function paginateGenko(blocks){
+  const [W,H]=dims();
+  $('sheetHead').innerHTML=headHTML();
+  const headH=$('sheetHead').offsetHeight;
+  $('sheetFoot').innerHTML=footHTML(0,1);
+  const footH=$('sheetFoot').offsetHeight;
+  const size=gkMetrics().size,gap=Math.round(S.gkGap);
+  const rows=genkoRows(blocks);
+  const cap=i=>Math.max(1,Math.floor(((H-S.pad*2-footH-((S.titleMode==='all'||(S.titleMode==='first'&&i===0))?headH:0))+gap)/(size+gap)));
+  const pages=[];let cur=[];
+  rows.forEach(r=>{
+    if(r.br){if(cur.length){pages.push(cur);cur=[];}return;}
+    if(cur.length>=cap(pages.length)){pages.push(cur);cur=[];}
+    if(!cur.length&&r.cells&&!r.cells.length&&!r.div)return;
+    cur.push(r);
+  });
+  if(cur.length)pages.push(cur);
+  return pages.length?pages:[[]];
+}
+function renderGenko(rows,wrap){
+  const mm=gkMetrics(),cols=mm.cols,size=mm.size,gap=Math.round(S.gkGap);
+  const lw=Math.max(.5,S.gkLine);
+  const gcol=hexToRgba(S.gkColor,S.gkOp);
+  wrap.style.fontFamily=S.font;
+  (rows||[]).forEach(r=>{
+    const row=document.createElement('div');
+    row.style.cssText=`display:flex;margin-bottom:${gap}px`;
+    if(r.div){
+      row.style.cssText+=`;height:${size}px;align-items:center;justify-content:center;`
+        +`color:${S.dividerColor};font-size:${Math.round(size*.7)}px;letter-spacing:.4em`;
+      row.textContent=S.dividerMark==='custom'?(S.dividerCustom||'\u2767'):S.dividerMark;
+      wrap.appendChild(row);return;
+    }
+    for(let i=0;i<cols;i++){
+      const c=document.createElement('div');
+      c.style.cssText=`width:${size}px;height:${size}px;box-sizing:border-box;flex:0 0 auto;`
+        +`border:${lw}px solid ${gcol};margin:0 -${lw}px -${lw}px 0;`
+        +`display:flex;align-items:center;justify-content:center;overflow:hidden;line-height:1;`
+        +`font-size:${Math.round(size*S.gkScale)}px;color:${r.color||S.cText}`;
+      const d=(r.cells||[])[i];
+      if(d&&d.c){
+        if(d.extra)c.style.fontSize=Math.round(size*S.gkScale*.62)+'px';
+        [d,d.extra].forEach(x=>{
+          if(!x)return;
+          const sp=document.createElement('span');
+          sp.textContent=x.c;
+          if(x.b)sp.style.fontWeight='700';
+          if(x.i)sp.style.fontStyle='italic';
+          if(x.s)sp.style.textDecoration='line-through';
+          if(x.h)sp.style.background=hexToRgba(S.cHl,S.hlOp);
+          c.appendChild(sp);
+        });
+      }
+      row.appendChild(c);
+    }
+    wrap.appendChild(row);
+  });
+}
 function renderFrame(){
   const f=$('frameL');f.innerHTML='';
   if(S.frame==='none')return;
@@ -1257,6 +1485,39 @@ function renderFrame(){
       +mk(`bottom:${i}px;left:${i}px`,`border-bottom:2px solid ${c};border-left:2px solid ${c}`)
       +mk(`bottom:${i}px;right:${i}px`,`border-bottom:2px solid ${c};border-right:2px solid ${c}`);
   }
+}
+function renderCorners(){
+  if(S.cornerMark==='none')return;
+  const ch=S.cornerMark==='custom'?(S.cornerCustom||''):S.cornerMark;
+  if(!ch)return;
+  const f=$('frameL');
+  const sz=Math.round(S.fsize*S.cornerSize),i=S.cornerInset;
+  const mk=p=>`<div style="position:absolute;${p};font-size:${sz}px;color:${S.cornerColor};`+
+    `font-family:${S.font};line-height:1;opacity:.9">${esc(ch)}</div>`;
+  f.innerHTML+=mk(`top:${i}px;left:${i}px`)+mk(`top:${i}px;right:${i}px`)
+    +mk(`bottom:${i}px;left:${i}px`)+mk(`bottom:${i}px;right:${i}px`);
+}
+function applyDropcap(wrap,pageIdx){
+  if(S.dropcap==='off')return;
+  if(S.dropcap==='first'&&pageIdx!==0)return;
+  const el=wrap.querySelector('.b-narr, .b-say');
+  if(!el)return;
+  const walk=document.createTreeWalker(el,NodeFilter.SHOW_TEXT);
+  let node=walk.nextNode();
+  while(node&&!node.nodeValue.trim())node=walk.nextNode();
+  if(!node)return;
+  const txt=node.nodeValue;
+  const m=txt.match(/^\s*(["\u201c\u300c\u300e]?\S)/);
+  if(!m)return;
+  const head=m[1];
+  const rest=txt.slice(txt.indexOf(head)+head.length);
+  const span=document.createElement('span');
+  span.textContent=head;
+  span.style.cssText=`float:left;font-size:${(S.dropcapLines*0.98).toFixed(2)}em;line-height:.88;`+
+    `padding:.04em .1em 0 0;color:${S.dropcapColor};font-weight:700;font-style:normal`;
+  const frag=document.createDocumentFragment();
+  frag.appendChild(span);frag.appendChild(document.createTextNode(rest));
+  node.parentNode.replaceChild(frag,node);
 }
 function measureBlocks(blocks){
   const [W]=dims();
@@ -1330,8 +1591,10 @@ function renderPage(i){
   const wrap=document.createElement('div');
   if(S.mode==='quote')wrap.className='quote-wrap';
   _prevWho=null;
-  (PAGES[i]||[]).forEach(b=>{const e=blockEl(b);if(e)wrap.appendChild(e);});
+  if(S.mode==='genko')renderGenko(PAGES[i],wrap);
+  else (PAGES[i]||[]).forEach(b=>{const e=blockEl(b);if(e)wrap.appendChild(e);});
   body.appendChild(wrap);
+  if(S.mode!=='genko')applyDropcap(wrap,i);
   if(S.mode==='quote')fitQuote(body,wrap);
   else{
     wrap.style.marginTop='0';
@@ -1358,10 +1621,11 @@ function renderAll(){
   stage.style.width=W+'px';stage.style.height=H+'px';
   const sheet=$('sheet');sheet.style.padding=S.pad+'px';
   applyTypo(sheet);
-  renderBg();renderFrame();renderStickers();
+  renderBg();renderFrame();renderCorners();renderStickers();
   const blocks=parseScript(S.script);
   syncSpeakers(blocks);renderSpeakerList(blocks);
-  PAGES=S.mode==='quote'?[blocks.filter(b=>b.t!=='break')]:paginate(blocks);
+  PAGES=S.mode==='quote'?[blocks.filter(b=>b.t!=='break')]
+    :(S.mode==='genko'?paginateGenko(blocks):paginate(blocks));
   if(PG>=PAGES.length)PG=PAGES.length-1;
   if(PG<0)PG=0;
   renderPage(PG);updatePageNav();fitPreview();
@@ -1493,7 +1757,7 @@ function bindSeg(id,key,after){
   });
 }
 
-bindSeg('modeSeg','mode',()=>{PG=0;$('modeHint').textContent=MODE_HINT[S.mode];});
+bindSeg('modeSeg','mode',()=>{PG=0;$('modeHint').textContent=MODE_HINT[S.mode];$('gkCtrl').style.display=S.mode==='genko'?'flex':'none';});
 bindSeg('bodyYSeg','bodyY');
 bindSeg('ratioSeg','ratio',()=>{PG=0;$('customRatio').style.display=S.ratio==='custom'?'block':'none';});
 function clampSize(v,d){v=parseInt(v);if(!isFinite(v))return d;return Math.max(200,Math.min(4000,v));}
@@ -1527,9 +1791,13 @@ bindSeg('barModeSeg','barMode',()=>{$('barColorField').style.display=S.barMode==
 bindSeg('lineSideSeg','lineSide');
 bindSeg('talkNarrAlignSeg','talkNarrAlign');
 bindSeg('frameSeg','frame');
+bindSeg('cornerSeg','cornerMark',()=>{$('cornerCustomField').style.display=S.cornerMark==='custom'?'flex':'none';});
+bindSeg('dividerSeg','dividerMark',()=>{$('dividerCustomField').style.display=S.dividerMark==='custom'?'flex':'none';});
+bindSeg('dropcapSeg','dropcap');
 bindSeg('signAlignSeg','signAlign');
 bindSeg('titleRuleSeg','titleRule');
 bindSeg('signRuleSeg','signRule');
+bindSeg('signRuleScopeSeg','signRuleScope');
 bindSeg('quoteLineSeg','quoteLine');
 bindSeg('signSepSeg','signSep',()=>{$('sepCustomField').style.display=S.signSep==='custom'?'flex':'none';});
 bindSeg('pageNumSeg','pageNum');
@@ -1543,10 +1811,17 @@ bindSeg('bgModeSeg','bgMode',()=>{
 });
 
 bindText('title','title');bindText('subtitle','subtitle');bindText('sign','sign');
+bindText('cornerCustom','cornerCustom');bindText('dividerCustom','dividerCustom');
 bindText('sign2','sign2');bindText('signSepCustom','signSepCustom');
 $('script').addEventListener('input',()=>{S.script=$('script').value;renderAll();});
 
 bindRange('pad','pad',v=>v);
+bindSeg('gkBaseSeg','gkBase',()=>{gkBaseUI();});
+bindRange('gkCols','gkCols',v=>v);
+bindRange('gkIndent','gkIndent',v=>v+'칸');
+bindSeg('gkIndentSaySeg','gkIndentSay');bindRange('gkGap','gkGap',v=>v);
+bindRange('gkOp','gkOp',v=>Math.round(v*100)+'%');bindRange('gkLine','gkLine',v=>v);
+bindRange('gkScale','gkScale',v=>v.toFixed(2)+'\u00d7');
 bindRange('fsize','fsize',v=>v);
 bindRange('lh','lh',v=>v.toFixed(2));
 bindRange('ls','ls',v=>v);
@@ -1564,12 +1839,18 @@ bindRange('gradAngle','gradAngle',v=>v+'\u00b0');
 bindRange('ovOpacity','ovOpacity',v=>Math.round(v*100)+'%');
 bindRange('paperGrain','paperGrain',v=>Math.round(v*100)+'%');
 bindRange('frameInset','frameInset',v=>v);
+bindRange('cornerSize','cornerSize',v=>v.toFixed(2)+'\u00d7');
+bindRange('cornerInset','cornerInset',v=>v);
+bindRange('dividerSize','dividerSize',v=>v.toFixed(2)+'\u00d7');
+bindRange('dividerGap','dividerGap',v=>v.toFixed(2)+'\u00d7');
+bindRange('dropcapLines','dropcapLines',v=>v);
 bindRange('vig','vig',v=>Math.round(v*100)+'%');
 bindRange('grainAmt','grainAmt',v=>Math.round(v*100)+'%');
 bindRange('signSize','signSize',v=>v.toFixed(2)+'\u00d7');
 bindRange('ruleWeight','ruleWeight',v=>v);
 bindRange('titleRuleWidth','titleRuleWidth',v=>v+'%');
 bindRange('signRuleWidth','signRuleWidth',v=>v+'%');
+bindRange('signRuleX','signRuleX',v=>v);
 bindRange('quality','quality',v=>Math.round(v*100)+'%');
 bindRange('bgPosX','bgPosX',v=>v+'%');
 bindRange('bgPosY','bgPosY',v=>v+'%');
@@ -1583,7 +1864,7 @@ bindRange('hlOp','hlOp',v=>Math.round(v*100)+'%');
 bindColor('gradFrom','gradFrom');bindColor('gradMid','gradMid');bindColor('gradTo','gradTo');
 bindColor('bgSolid','bgSolid');bindColor('paperColor','paperColor');
 bindColor('ovColor','ovColor');bindColor('frameColor','frameColor');bindColor('signColor','signColor');
-bindColor('strokeColor','strokeColor');bindColor('barColor','barColor');bindColor('sepColor','sepColor');bindColor('titleRuleColor','titleRuleColor');bindColor('signRuleColor','signRuleColor');
+bindColor('gkColor','gkColor');bindColor('cornerColor','cornerColor');bindColor('dividerColor','dividerColor');bindColor('dropcapColor','dropcapColor');bindColor('strokeColor','strokeColor');bindColor('barColor','barColor');bindColor('sepColor','sepColor');bindColor('titleRuleColor','titleRuleColor');bindColor('signRuleColor','signRuleColor');
 
 $('font').addEventListener('change',()=>{S.font=$('font').value;renderAll();});
 $('fontUploadBtn').addEventListener('click',()=>$('fontFile').click());
@@ -1605,6 +1886,13 @@ $('fontFile').addEventListener('change',e=>{
 });
 
 /* 그라디언트 칩 */
+function gkBaseUI(){
+  const f=S.gkBase==='fsize';
+  $('gkColsField').style.display=f?'none':'flex';
+  $('gkBaseHint').textContent=f
+    ?'글자 탭의 크기와 아래 글자 크기 비율로 칸 크기가 정해지고, 칸 수는 지면에 들어가는 만큼 채워집니다.'
+    :'칸 수로 칸 크기가 정해지고, 글자는 칸에 맞춰 커집니다.';
+}
 function buildGradChips(){
   const w=$('gradChips');w.innerHTML='';
   Object.entries(GRADIENTS).forEach(([name,c])=>{
@@ -1718,20 +2006,27 @@ const serialize=()=>JSON.parse(JSON.stringify(S));
 function applyState(o){
   S={...DEFAULTS(),...o};S.spk={...(o.spk||{})};
   $('title').value=S.title;$('subtitle').value=S.subtitle;$('sign').value=S.sign;
-  $('sign2').value=S.sign2||'';$('signSepCustom').value=S.signSepCustom||'';
+  $('sign2').value=S.sign2||'';$('cornerCustom').value=S.cornerCustom||'';$('dividerCustom').value=S.dividerCustom||'';$('signSepCustom').value=S.signSepCustom||'';
   $('script').value=S.script;$('font').value=S.font;
-  ['cText','cDia','cTitle','cSub','cHead','cHl','strokeColor','barColor','gradFrom','gradMid','gradTo','bgSolid','paperColor','ovColor','frameColor','signColor','sepColor','titleRuleColor','signRuleColor']
+  ['cText','cDia','cTitle','cSub','cHead','cHl','strokeColor','barColor','cornerColor','dividerColor','dropcapColor','gkColor','gradFrom','gradMid','gradTo','bgSolid','paperColor','ovColor','frameColor','signColor','sepColor','titleRuleColor','signRuleColor']
     .forEach(k=>{if($(k))$(k).value=S[k];});
   const set=(id,v,t)=>{if($(id)){$(id).value=v;const l=$(id+'V');if(l)l.textContent=t;}};
-  set('pad',S.pad,S.pad);set('fsize',S.fsize,S.fsize);set('lh',S.lh,(+S.lh).toFixed(2));set('ls',S.ls,S.ls);
+  set('pad',S.pad,S.pad);
+  set('gkCols',S.gkCols,S.gkCols);set('gkIndent',S.gkIndent,S.gkIndent+'칸');set('gkGap',S.gkGap,S.gkGap);
+  set('gkOp',S.gkOp,Math.round(S.gkOp*100)+'%');set('gkLine',S.gkLine,S.gkLine);
+  set('gkScale',S.gkScale,(+S.gkScale).toFixed(2)+'\u00d7');set('fsize',S.fsize,S.fsize);set('lh',S.lh,(+S.lh).toFixed(2));set('ls',S.ls,S.ls);
   set('tsize',S.tsize,(+S.tsize).toFixed(2)+'\u00d7');set('shadow',S.shadow,Math.round(S.shadow*100)+'%');set('hlOp',S.hlOp,Math.round(S.hlOp*100)+'%');set('strokeW',S.strokeW,S.strokeW);
   set('titleY',S.titleY,S.titleY);set('signX',S.signX,S.signX);set('signY',S.signY,S.signY);
   set('bubRad',S.bubRad,S.bubRad);set('bubOp',S.bubOp,Math.round(S.bubOp*100)+'%');set('avSize',S.avSize,S.avSize);set('bubMax',S.bubMax,S.bubMax+'%');
   set('gradAngle',S.gradAngle,S.gradAngle+'\u00b0');set('ovOpacity',S.ovOpacity,Math.round(S.ovOpacity*100)+'%');
-  set('paperGrain',S.paperGrain,Math.round(S.paperGrain*100)+'%');set('frameInset',S.frameInset,S.frameInset);
+  set('paperGrain',S.paperGrain,Math.round(S.paperGrain*100)+'%');
+set('frameInset',S.frameInset,S.frameInset);
+  set('cornerSize',S.cornerSize,(+S.cornerSize).toFixed(2)+'\u00d7');set('cornerInset',S.cornerInset,S.cornerInset);
+  set('dividerSize',S.dividerSize,(+S.dividerSize).toFixed(2)+'\u00d7');set('dividerGap',S.dividerGap,(+S.dividerGap).toFixed(2)+'\u00d7');
+  set('dropcapLines',S.dropcapLines,S.dropcapLines);
   set('vig',S.vig,Math.round(S.vig*100)+'%');set('grainAmt',S.grainAmt,Math.round(S.grainAmt*100)+'%');
   set('signSize',S.signSize,(+S.signSize).toFixed(2)+'\u00d7');
-  set('ruleWeight',S.ruleWeight,S.ruleWeight);set('titleRuleWidth',S.titleRuleWidth,S.titleRuleWidth+'%');set('signRuleWidth',S.signRuleWidth,S.signRuleWidth+'%');set('quality',S.quality,Math.round(S.quality*100)+'%');
+  set('ruleWeight',S.ruleWeight,S.ruleWeight);set('titleRuleWidth',S.titleRuleWidth,S.titleRuleWidth+'%');set('signRuleWidth',S.signRuleWidth,S.signRuleWidth+'%');set('signRuleX',S.signRuleX,S.signRuleX);set('quality',S.quality,Math.round(S.quality*100)+'%');
   set('bgPosX',S.bgPosX,S.bgPosX+'%');set('bgPosY',S.bgPosY,S.bgPosY+'%');set('bgZoom',S.bgZoom,S.bgZoom+'%');
   set('bgBlur',S.bgBlur,S.bgBlur);
   $('cw').value=S.cw;$('ch').value=S.ch;
@@ -1739,15 +2034,18 @@ function applyState(o){
   const seg=(id,val)=>{if($(id))[...$(id).children].forEach(c=>{
     let cv=c.dataset.v;if(cv==='on')cv=true;if(cv==='off')cv=false;
     c.classList.toggle('active',String(cv)===String(val));});};
-  seg('modeSeg',S.mode);seg('ratioSeg',S.ratio);seg('bodyYSeg',S.bodyY);seg('titleModeSeg',S.titleMode);seg('alignSeg',S.align);
+  seg('modeSeg',S.mode);seg('gkBaseSeg',S.gkBase);seg('gkIndentSaySeg',S.gkIndentSay);seg('ratioSeg',S.ratio);seg('bodyYSeg',S.bodyY);seg('titleModeSeg',S.titleMode);seg('alignSeg',S.align);
   seg('novelLabelSeg',S.novelLabel);seg('showNameSeg',S.showName);seg('bubBorderSeg',S.bubBorder);
   seg('bubStyleSeg',S.bubStyle);seg('diaColorSeg',S.diaColor);seg('quoteStyleSeg',S.quoteStyle);seg('quoteFollowSeg',S.quoteFollowSide);seg('hlStyleSeg',S.hlStyle);seg('barModeSeg',S.barMode);
   $('barColorField').style.display=S.barMode==='fixed'?'flex':'none';seg('lineSideSeg',S.lineSide);seg('talkNarrAlignSeg',S.talkNarrAlign);
-  seg('frameSeg',S.frame);seg('signAlignSeg',S.signAlign);seg('pageNumSeg',S.pageNum);
-  seg('titleRuleSeg',S.titleRule);seg('signRuleSeg',S.signRule);seg('quoteLineSeg',S.quoteLine);seg('signSepSeg',S.signSep);
+  seg('frameSeg',S.frame);seg('cornerSeg',S.cornerMark);seg('dividerSeg',S.dividerMark);seg('dropcapSeg',S.dropcap);
+  $('cornerCustomField').style.display=S.cornerMark==='custom'?'flex':'none';
+  $('dividerCustomField').style.display=S.dividerMark==='custom'?'flex':'none';seg('signAlignSeg',S.signAlign);seg('pageNumSeg',S.pageNum);
+  seg('titleRuleSeg',S.titleRule);seg('signRuleSeg',S.signRule);seg('signRuleScopeSeg',S.signRuleScope);seg('quoteLineSeg',S.quoteLine);seg('signSepSeg',S.signSep);
   $('sepCustomField').style.display=S.signSep==='custom'?'flex':'none';
   seg('formatSeg',S.format);seg('bgModeSeg',S.bgMode);seg('transSeg',S.transparent);
   $('modeHint').textContent=MODE_HINT[S.mode];
+  $('gkCtrl').style.display=S.mode==='genko'?'flex':'none';gkBaseUI();
   $('bgGradientCtrl').style.display=S.bgMode==='gradient'?'block':'none';
   $('bgSolidCtrl').style.display=S.bgMode==='solid'?'block':'none';
   $('bgPaperCtrl').style.display=S.bgMode==='paper'?'block':'none';
@@ -2126,10 +2424,12 @@ $('stkDel').addEventListener('click',()=>{
 document.body.appendChild($('measure'));
 $('script').value=S.script;
 $('modeHint').textContent=MODE_HINT[S.mode];
-['modeSeg:mode','ratioSeg:ratio','bodyYSeg:bodyY','titleModeSeg:titleMode','alignSeg:align','novelLabelSeg:novelLabel',
+$('gkCtrl').style.display=S.mode==='genko'?'flex':'none';
+gkBaseUI();
+['modeSeg:mode','ratioSeg:ratio','bodyYSeg:bodyY','gkBaseSeg:gkBase','gkIndentSaySeg:gkIndentSay','titleModeSeg:titleMode','alignSeg:align','novelLabelSeg:novelLabel',
  'showNameSeg:showName','bubBorderSeg:bubBorder','frameSeg:frame','signAlignSeg:signAlign',
  'pageNumSeg:pageNum','formatSeg:format','bgModeSeg:bgMode','titleRuleSeg:titleRule',
- 'signRuleSeg:signRule','quoteLineSeg:quoteLine','signSepSeg:signSep','transSeg:transparent','bubStyleSeg:bubStyle','diaColorSeg:diaColor',
+ 'signRuleSeg:signRule','signRuleScopeSeg:signRuleScope','cornerSeg:cornerMark','dividerSeg:dividerMark','dropcapSeg:dropcap','quoteLineSeg:quoteLine','signSepSeg:signSep','transSeg:transparent','bubStyleSeg:bubStyle','diaColorSeg:diaColor',
  'quoteStyleSeg:quoteStyle','quoteFollowSeg:quoteFollowSide','hlStyleSeg:hlStyle','barModeSeg:barMode','lineSideSeg:lineSide','talkNarrAlignSeg:talkNarrAlign'].forEach(p=>{
   const [id,k]=p.split(':');
   [...$(id).children].forEach(c=>{let cv=c.dataset.v;if(cv==='on')cv=true;if(cv==='off')cv=false;
