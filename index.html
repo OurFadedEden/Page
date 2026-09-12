@@ -360,6 +360,11 @@ input[type=color]{width:100%;height:28px;padding:0;border:1px solid var(--line);
           <input type="range" id="avSize" min="0" max="120" step="2" value="56"></div>
         <div class="field"><label>이름표</label>
           <div class="seg" id="showNameSeg"><button data-v="on">표시</button><button data-v="off">숨김</button></div></div>
+        <div class="field"><label>지문 정렬</label>
+          <div class="seg" id="talkNarrAlignSeg">
+            <button data-v="left">왼쪽</button><button data-v="center">가운데</button>
+            <button data-v="right">오른쪽</button><button data-v="justify">양끝</button>
+          </div></div>
         <div class="field"><label>화자 없는 대사 위치</label>
           <div class="seg" id="lineSideSeg">
             <button data-v="left">왼쪽</button><button data-v="right">오른쪽</button><button data-v="center">가운데</button>
@@ -415,6 +420,10 @@ input[type=color]{width:100%;height:28px;padding:0;border:1px solid var(--line);
           <div class="seg" id="quoteStyleSeg">
             <button data-v="plain">그대로</button><button data-v="bar">세로선</button>
             <button data-v="indent">들여쓰기</button><button data-v="block">배경 칠</button>
+          </div></div>
+        <div class="field"><label>대사를 화자 위치에 맞추기</label>
+          <div class="seg" id="quoteFollowSeg">
+            <button data-v="off">모두 왼쪽</button><button data-v="on">화자 위치 따라</button>
           </div></div>
         <div class="grid2">
           <div class="field"><label>부제</label><input type="color" id="cSub" value="#efe7d8"></div>
@@ -532,15 +541,17 @@ input[type=color]{width:100%;height:28px;padding:0;border:1px solid var(--line);
           <div class="seg" id="signRuleSeg">
             <button data-v="none">없음</button><button data-v="top">위</button></div></div>
         <div class="grid2">
-          <div class="field"><label>제목 구분선 색</label><input type="color" id="titleRuleColor" value="#efe7d8"></div>
-          <div class="field"><label>서명 구분선 색</label><input type="color" id="signRuleColor" value="#c8a45c"></div>
+          <div class="field"><label>제목선 색</label><input type="color" id="titleRuleColor" value="#efe7d8"></div>
+          <div class="field"><label>제목선 길이 <span class="v" id="titleRuleWidthV">100%</span></label>
+            <input type="range" id="titleRuleWidth" min="5" max="100" step="1" value="100"></div>
         </div>
         <div class="grid2">
-          <div class="field"><label>구분선 굵기 <span class="v" id="ruleWeightV">1.5</span></label>
-            <input type="range" id="ruleWeight" min=".5" max="6" step=".5" value="1.5"></div>
-          <div class="field"><label>구분선 길이 <span class="v" id="ruleWidthV">100%</span></label>
-            <input type="range" id="ruleWidth" min="10" max="100" step="2" value="100"></div>
+          <div class="field"><label>서명선 색</label><input type="color" id="signRuleColor" value="#c8a45c"></div>
+          <div class="field"><label>서명선 길이 <span class="v" id="signRuleWidthV">100%</span></label>
+            <input type="range" id="signRuleWidth" min="5" max="100" step="1" value="100"></div>
         </div>
+        <div class="field"><label>구분선 굵기 <span class="v" id="ruleWeightV">1.5</span></label>
+          <input type="range" id="ruleWeight" min=".5" max="6" step=".5" value="1.5"></div>
         <div class="field"><label>쪽번호</label>
           <div class="seg" id="pageNumSeg">
             <button data-v="off">없음</button><button data-v="num">1</button>
@@ -600,7 +611,7 @@ const GRADIENTS={
   '\ud3f4\uc778\ub7fd':['#6385E7','#ADBBE2','#F7F0DD'],
   '\ubaa8\uc5d0':['#FFFFFF','#FDE3E1','#FBCFD5'],
   '\ub808\ud130':['#B4696D','#D0A3AC','#E8EEFF'],
-  '\ucf64\ub9c8':['#F4A59C','#D5BCC8','#B9D1F1'],
+  '\ucf64\ub9c8':['#F4A59C','#C398C6','#8F8BE8'],
   '\ud604\uc740':['#B5F2FF','#DAF3D1','#FFF4A2'],
   '\uc7ac\uc740':['#000000','#807A51','#FFF4A2'],
   '\ud544\ub9c1':['#122D62','#5D7BB0','#FFFFFF'],
@@ -624,13 +635,13 @@ const PALETTE=['#e8c98a','#8fb8d8','#d89aa8','#9dc79b','#c3a3e0','#e0a878','#7fc
 const DEFAULTS=()=>({
   mode:'quote', ratio:'1:1', cw:1080, ch:1350, pad:72,
   title:'', subtitle:'', titleMode:'first', script:SAMPLE,
-  titleRule:'bottom', ruleWeight:1.5, ruleWidth:100, signRule:'top', quoteLine:'inherit',
+  titleRule:'bottom', ruleWeight:1.5, titleRuleWidth:100, signRuleWidth:100, signRule:'top', quoteLine:'inherit',
   titleRuleColor:'#efe7d8', signRuleColor:'#c8a45c',
   font:"'Ridibatang', serif", fsize:40, lh:1.8, ls:0, align:'left',
   cText:'#efe7d8', cDia:'#e8c98a', cTitle:'#efe7d8', cSub:'#efe7d8', cHead:'#efe7d8', tsize:1.3, shadow:0,
   spk:{}, novelLabel:'none',
   bubRad:22, bubOp:.9, avSize:56, showName:true, bubBorder:true,
-  bubStyle:'fill', diaColor:'fixed', quoteStyle:'plain', lineSide:'left',
+  bubStyle:'fill', diaColor:'fixed', quoteStyle:'plain', quoteFollowSide:false, lineSide:'left', talkNarrAlign:'center',
   bgMode:'gradient', gradFrom:'#ffe19a', gradMid:'#5a93a8', gradTo:'#13314a',
   gradAngle:165, gradPreset:'\ucb4c', bgSolid:'#141019',
   paperColor:'#efe7d8', paperGrain:.4,
@@ -715,9 +726,16 @@ function blockEl(b){
     d.className='b-say';
     const col=(S.diaColor==='speaker'&&b.t==='say'&&b.who)?spkOf(b.who).color:S.cDia;
     d.style.setProperty('--c-dia',col);
-    if(S.quoteStyle==='bar'){d.style.borderLeft=`${Math.max(2,Math.round(S.fsize*.07))}px solid ${col}`;d.style.paddingLeft='.7em';}
-    else if(S.quoteStyle==='indent'){d.style.paddingLeft='1.6em';}
+    const sd=(S.quoteFollowSide&&b.t==='say'&&b.who)?(spkOf(b.who).side||'left'):'left';
+    const w=Math.max(2,Math.round(S.fsize*.07));
+    if(S.quoteStyle==='bar'){
+      if(sd==='right'){d.style.borderRight=`${w}px solid ${col}`;d.style.paddingRight='.7em';}
+      else if(sd==='center'){d.style.borderLeft=`${w}px solid ${col}`;d.style.paddingLeft='.7em';}
+      else{d.style.borderLeft=`${w}px solid ${col}`;d.style.paddingLeft='.7em';}
+    }
+    else if(S.quoteStyle==='indent'){d.style[sd==='right'?'paddingRight':'paddingLeft']='1.6em';}
     else if(S.quoteStyle==='block'){d.style.background=hexToRgba(col,.13);d.style.padding='.45em .7em';d.style.borderRadius=Math.round(S.fsize*.16)+'px';}
+    if(S.quoteFollowSide&&b.t==='say'&&b.who)d.style.textAlign=sd==='center'?'center':sd;
     let body=b.text;
     if(!QUOTED.test(body))body='"'+body+'"';
     let html=inline(body);
@@ -771,10 +789,13 @@ function talkEl(b){
   }
   if(b.t!=='say'){
     _prevWho=null;
-    row.className='row center';
-    const st=document.createElement('div');st.className='stack';st.style.maxWidth='100%';
-    const bu=document.createElement('div');bu.className='bub';bu.innerHTML=inline(b.text);
-    st.appendChild(bu);row.appendChild(st);return row;
+    const a=S.talkNarrAlign||'center';
+    row.className='row';row.style.display='block';
+    const bu=document.createElement('div');bu.className='bub narr-line';
+    bu.style.cssText='background:none;border:none;box-shadow:none;padding:0;max-width:100%;';
+    bu.style.textAlign=a;bu.style.opacity='.78';bu.style.fontStyle='italic';
+    bu.innerHTML=inline(b.text);
+    row.appendChild(bu);return row;
   }
   const sp=spkOf(b.who);
   const cont=(_prevWho===b.who);
@@ -795,6 +816,13 @@ function talkEl(b){
   if(S.showName&&!cont){const nm=document.createElement('div');nm.className='nm';nm.textContent=b.who;nm.style.color=sp.color;st.appendChild(nm);}
   const bu=document.createElement('div');bu.className='bub';
   bu.innerHTML=inline(b.text);styleBub(bu,sp.color,sp.side||'left');
+  if(sp.av===false&&(sp.side||'left')!=='center'){
+    st.style.maxWidth='100%';st.style.width='100%';
+    const st2=S.bubStyle;
+    if(st2==='fill'||st2==='outline'||st2==='solid'||st2==='tail'){
+      if((sp.side||'left')==='right')bu.style.marginRight='-.9em';else bu.style.marginLeft='-.9em';
+    }
+  }
   st.appendChild(bu);row.appendChild(st);return row;
 }
 function logEl(b){
@@ -809,9 +837,9 @@ function logEl(b){
 }
 
 /* ---------- 머리·꼬리 ---------- */
-function ruleHTML(color,align,gapTop,gapBot){
+function ruleHTML(color,align,gapTop,gapBot,width){
   const mg=align==='center'?'0 auto':(align==='right'?'0 0 0 auto':'0');
-  return `<div style="background:${color};opacity:.45;height:${S.ruleWeight}px;width:${S.ruleWidth}%;margin:${mg};margin-top:${gapTop}px;margin-bottom:${gapBot}px"></div>`;
+  return `<div style="background:${color};opacity:.45;height:${S.ruleWeight}px;width:${width}%;margin:${mg};margin-top:${gapTop}px;margin-bottom:${gapBot}px"></div>`;
 }
 function headHTML(){
   if(S.titleMode==='off')return '';
@@ -820,10 +848,10 @@ function headHTML(){
   const ta=S.align==='justify'?'left':S.align;
   const g=Math.round(S.fsize*.5);
   let h=`<div style="padding-bottom:${Math.round(S.fsize*.9)}px;text-align:${ta}">`;
-  if(S.titleRule==='top'||S.titleRule==='both')h+=ruleHTML(S.titleRuleColor,ta,0,g);
+  if(S.titleRule==='top'||S.titleRule==='both')h+=ruleHTML(S.titleRuleColor,ta,0,g,S.titleRuleWidth);
   if(S.title.trim())h+=`<h2 class="s-title" style="font-size:${ts}px;color:${S.cTitle};font-family:${S.font};letter-spacing:${S.ls}px">${esc(S.title)}</h2>`;
   if(S.subtitle.trim())h+=`<p class="s-sub" style="font-size:${Math.round(ts*.42)}px;color:${S.cSub};font-family:${S.font}">${esc(S.subtitle)}</p>`;
-  if(S.titleRule==='bottom'||S.titleRule==='both')h+=ruleHTML(S.titleRuleColor,ta,g,0);
+  if(S.titleRule==='bottom'||S.titleRule==='both')h+=ruleHTML(S.titleRuleColor,ta,g,0,S.titleRuleWidth);
   h+=`</div>`;
   return h;
 }
@@ -844,7 +872,7 @@ function footHTML(pageIdx,total){
   const pg=hasNum?`<span class="s-page" style="color:${S.signColor}">${num}</span>`:'<span></span>';
   const order=S.signAlign==='right'?pg+sign:sign+pg;
   const just=S.signAlign==='center'?'center':'space-between';
-  const rule=S.signRule!=='none'?ruleHTML(S.signRuleColor,S.signAlign,0,Math.round(fs*.75)):'';
+  const rule=S.signRule!=='none'?ruleHTML(S.signRuleColor,S.signAlign,0,Math.round(fs*.75),S.signRuleWidth):'';
   return `<div style="padding-top:${Math.round(S.fsize*.8)}px">${rule}<div class="s-foot" style="font-size:${fs}px;font-family:${S.font};justify-content:${just};gap:${Math.round(fs*1.2)}px">${order}</div></div>`;
 }
 
@@ -1112,7 +1140,9 @@ bindSeg('bubBorderSeg','bubBorder');
 bindSeg('bubStyleSeg','bubStyle');
 bindSeg('diaColorSeg','diaColor');
 bindSeg('quoteStyleSeg','quoteStyle');
+bindSeg('quoteFollowSeg','quoteFollowSide');
 bindSeg('lineSideSeg','lineSide');
+bindSeg('talkNarrAlignSeg','talkNarrAlign');
 bindSeg('frameSeg','frame');
 bindSeg('signAlignSeg','signAlign');
 bindSeg('titleRuleSeg','titleRule');
@@ -1150,7 +1180,8 @@ bindRange('vig','vig',v=>Math.round(v*100)+'%');
 bindRange('grainAmt','grainAmt',v=>Math.round(v*100)+'%');
 bindRange('signSize','signSize',v=>v.toFixed(2)+'\u00d7');
 bindRange('ruleWeight','ruleWeight',v=>v);
-bindRange('ruleWidth','ruleWidth',v=>v+'%');
+bindRange('titleRuleWidth','titleRuleWidth',v=>v+'%');
+bindRange('signRuleWidth','signRuleWidth',v=>v+'%');
 bindRange('quality','quality',v=>Math.round(v*100)+'%');
 bindRange('bgPosX','bgPosX',v=>v+'%');
 bindRange('bgPosY','bgPosY',v=>v+'%');
@@ -1308,7 +1339,7 @@ function applyState(o){
   set('paperGrain',S.paperGrain,Math.round(S.paperGrain*100)+'%');set('frameInset',S.frameInset,S.frameInset);
   set('vig',S.vig,Math.round(S.vig*100)+'%');set('grainAmt',S.grainAmt,Math.round(S.grainAmt*100)+'%');
   set('signSize',S.signSize,(+S.signSize).toFixed(2)+'\u00d7');
-  set('ruleWeight',S.ruleWeight,S.ruleWeight);set('ruleWidth',S.ruleWidth,S.ruleWidth+'%');set('quality',S.quality,Math.round(S.quality*100)+'%');
+  set('ruleWeight',S.ruleWeight,S.ruleWeight);set('titleRuleWidth',S.titleRuleWidth,S.titleRuleWidth+'%');set('signRuleWidth',S.signRuleWidth,S.signRuleWidth+'%');set('quality',S.quality,Math.round(S.quality*100)+'%');
   set('bgPosX',S.bgPosX,S.bgPosX+'%');set('bgPosY',S.bgPosY,S.bgPosY+'%');set('bgZoom',S.bgZoom,S.bgZoom+'%');
   set('bgBlur',S.bgBlur,S.bgBlur);
   $('cw').value=S.cw;$('ch').value=S.ch;
@@ -1318,7 +1349,7 @@ function applyState(o){
     c.classList.toggle('active',String(cv)===String(val));});};
   seg('modeSeg',S.mode);seg('ratioSeg',S.ratio);seg('titleModeSeg',S.titleMode);seg('alignSeg',S.align);
   seg('novelLabelSeg',S.novelLabel);seg('showNameSeg',S.showName);seg('bubBorderSeg',S.bubBorder);
-  seg('bubStyleSeg',S.bubStyle);seg('diaColorSeg',S.diaColor);seg('quoteStyleSeg',S.quoteStyle);seg('lineSideSeg',S.lineSide);
+  seg('bubStyleSeg',S.bubStyle);seg('diaColorSeg',S.diaColor);seg('quoteStyleSeg',S.quoteStyle);seg('quoteFollowSeg',S.quoteFollowSide);seg('lineSideSeg',S.lineSide);seg('talkNarrAlignSeg',S.talkNarrAlign);
   seg('frameSeg',S.frame);seg('signAlignSeg',S.signAlign);seg('pageNumSeg',S.pageNum);
   seg('titleRuleSeg',S.titleRule);seg('signRuleSeg',S.signRule);seg('quoteLineSeg',S.quoteLine);seg('signSepSeg',S.signSep);
   $('sepCustomField').style.display=S.signSep==='custom'?'flex':'none';
@@ -1539,7 +1570,7 @@ $('modeHint').textContent=MODE_HINT[S.mode];
  'showNameSeg:showName','bubBorderSeg:bubBorder','frameSeg:frame','signAlignSeg:signAlign',
  'pageNumSeg:pageNum','formatSeg:format','bgModeSeg:bgMode','titleRuleSeg:titleRule',
  'signRuleSeg:signRule','quoteLineSeg:quoteLine','signSepSeg:signSep','transSeg:transparent','bubStyleSeg:bubStyle','diaColorSeg:diaColor',
- 'quoteStyleSeg:quoteStyle','lineSideSeg:lineSide'].forEach(p=>{
+ 'quoteStyleSeg:quoteStyle','quoteFollowSeg:quoteFollowSide','lineSideSeg:lineSide','talkNarrAlignSeg:talkNarrAlign'].forEach(p=>{
   const [id,k]=p.split(':');
   [...$(id).children].forEach(c=>{let cv=c.dataset.v;if(cv==='on')cv=true;if(cv==='off')cv=false;
     c.classList.toggle('active',String(cv)===String(S[k]));});
