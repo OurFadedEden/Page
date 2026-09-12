@@ -339,12 +339,17 @@ table.gd code{display:inline-block;margin:1px 2px 1px 0}
             <div class="seg" id="convModeSeg">
               <button data-v="same" class="active">대사와 같은 줄</button>
               <button data-v="above">대사 윗줄에 따로</button>
+              <button data-v="asterisk">이름 없음 (별표가 지문)</button>
             </div></div>
+          <div class="field"><label>대사에 붙일 이름 (비우면 이름 없이)</label>
+            <input type="text" id="convName" placeholder="예: 재준"></div>
           <div class="grid2">
             <button class="btn" id="convAppend">본문 끝에 붙이기</button>
             <button class="btn pri" id="convReplace">본문 갈아끼우기</button>
           </div>
-          <p class="hint">이름으로 안 잡힌 줄은 지문으로 들어가요. 변환 뒤에 손으로 고쳐도 돼요.</p>
+          <p class="hint"><code>이름: 대사</code> <code>[이름] 대사</code> <code>이름｜대사</code> 를 읽어요.<br>
+          <code>*별표*</code>로 감싼 줄은 어느 방식이든 지문으로 둡니다.<br>
+          <b>이름 없음</b>은 별표 줄만 지문으로 두고 나머지를 전부 대사로 바꿔요.</p>
         </div>
         <p class="hint">
           <code>@이름: 대사</code> 화자 대사<br>
@@ -670,7 +675,7 @@ table.gd code{display:inline-block;margin:1px 2px 1px 0}
 
 <div class="subhead">판형 네 가지</div>
 <table class="gd">
-<tr><td>인용</td><td>한 장짜리 발췌. 분량이 넘치면 글자 크기를 최대 절반까지 줄여서 한 장에 맞춥니다. 세로 가운데 정렬 고정이라 장 나눔 표시는 무시합니다</td></tr>
+<tr><td>인용</td><td>한 장짜리 발췌. 분량이 넘치면 글자 크기를 원래의 40% 선까지 줄여 한 장에 맞춥니다. 세로 가운데 정렬이 고정이라 장 나눔 표시와 본문 세로 위치 설정은 무시합니다</td></tr>
 <tr><td>대화</td><td>메신저 말풍선. 화자별 색·좌우·프로필을 쓰고, 같은 사람이 연달아 말하면 프로필과 이름표를 생략합니다. 지문은 말풍선 없이 전체 폭으로 깔립니다</td></tr>
 <tr><td>내지</td><td>소설 지면. 대사는 따옴표와 색으로만 구분하고, 분량이 넘치면 여러 장으로 나눕니다</td></tr>
 <tr><td>로그</td><td><code>[이름] 대사</code> 형태로 한 줄씩 쌓입니다. 상태창이나 기록물 느낌</td></tr>
@@ -688,7 +693,7 @@ table.gd code{display:inline-block;margin:1px 2px 1px 0}
 <tr><td>제목 · 부제</td><td>지면 맨 위에 들어갑니다. 표시 안 함 / 첫 장만 / 모든 장 중에 고릅니다</td></tr>
 <tr><td>제목 구분선</td><td>제목 위, 아래, 위아래 중에. 색과 길이는 꾸밈 탭에서</td></tr>
 <tr><td>따옴표 줄</td><td><b>앞 화자 대사</b>는 바로 위 화자가 이어 말하는 걸로, <b>화자 없는 대사</b>는 누구 것도 아닌 대사로, <b>지문으로</b>는 이 기능을 끕니다</td></tr>
-<tr><td>채팅 변환</td><td>복사해온 대화를 <code>@이름:</code> 형식으로 정리합니다. <code>이름: 대사</code>, <code>[이름] 대사</code>, 이름이 윗줄에 따로 있는 형태를 읽습니다. 못 읽은 줄은 지문이 되니 뒤에 손으로 고칩니다</td></tr>
+<tr><td>채팅 변환</td><td>복사해온 대화를 <code>@이름:</code> 형식으로 정리합니다. <code>이름: 대사</code> · <code>[이름] 대사</code> · <code>이름｜대사</code> · 이름이 윗줄에 따로 있는 형태를 읽습니다. 이름이 아예 없고 <code>*별표*</code>로 지문만 구분한 기록은 <b>이름 없음</b> 방식을 고르고, 원하면 대사에 붙일 이름을 적습니다</td></tr>
 </table>
 
 <div class="subhead">화자 탭</div>
@@ -697,8 +702,15 @@ table.gd code{display:inline-block;margin:1px 2px 1px 0}
 <tr><td>이름 고치기</td><td>카드의 이름을 눌러 고치면 본문의 <code>@이름:</code> 도 전부 같이 바뀝니다</td></tr>
 <tr><td>프로필</td><td>원을 누르면 사진을 넣습니다. <b>숨김</b>으로 두면 원이 사라지고 말풍선이 지문 줄에 맞춰 붙습니다</td></tr>
 <tr><td>화자 세트</td><td>이름·색·위치·프로필만 따로 저장합니다. 다른 발췌에서 불러오면 그대로 얹힙니다</td></tr>
-<tr><td>말풍선 모양</td><td>채움 · 선만 · 진하게 · 꼬리 · 세로선 · 글자만. 전부 화자 색을 따라갑니다</td></tr>
-<tr><td>지문 정렬</td><td>대화 판형의 지문을 왼쪽·가운데·오른쪽·양끝 중에 맞춥니다</td></tr>
+<tr><td>색 두 가지</td><td><b>말풍선</b>은 배경·프로필 원·세로선에, <b>이름</b>은 이름표와 로그의 <code>[이름]</code>에 쓰입니다. 이름 색을 한 번도 안 건드렸으면 말풍선 색을 따라가고, 직접 잡으면 그때부터 독립합니다</td></tr>
+<tr><td>같은 사람 연속</td><td>같은 화자가 연달아 말하면 프로필과 이름표를 생략해 한 덩어리로 보입니다</td></tr>
+<tr><td>말풍선 모양</td><td>채움 · 선만 · 진하게 · 꼬리 · 세로선 · 글자만. 전부 화자 색을 따라갑니다. 세로선은 오른쪽 화자면 선이 오른쪽에 섭니다</td></tr>
+<tr><td>최대 너비</td><td>말풍선이 차지할 수 있는 최대 폭(40~100%). 좁히면 메신저처럼, 넓히면 문서처럼 보입니다</td></tr>
+<tr><td>모서리 · 불투명도</td><td>둥글기와 배경 진하기. <b>글자만</b>과 <b>세로선</b> 모양에서는 모서리가 적용되지 않습니다</td></tr>
+<tr><td>프로필 크기</td><td>0으로 두면 모든 화자의 프로필이 사라집니다. 한 명만 없애려면 그 화자 카드에서 숨김을 고릅니다</td></tr>
+<tr><td>이름표</td><td>이름을 아예 안 보이게 할 수 있습니다</td></tr>
+<tr><td>지문 정렬</td><td>대화 판형의 지문을 왼쪽·가운데·오른쪽·양끝 중에 맞춥니다. 지문은 말풍선 없이 전체 폭을 씁니다</td></tr>
+<tr><td>화자 없는 대사 위치</td><td>따옴표만 쓴 대사를 어느 쪽에 놓을지. 왼쪽·오른쪽·가운데</td></tr>
 </table>
 
 <div class="subhead">글자 탭</div>
@@ -707,7 +719,12 @@ table.gd code{display:inline-block;margin:1px 2px 1px 0}
 <tr><td>대사 색 기준</td><td><b>화자 색 따라가기</b>를 켜면 인용·내지·로그에서도 대사 글자가 화자 색으로 나옵니다</td></tr>
 <tr><td>대사 모양</td><td>인용·내지 전용. 그대로 · 세로선 · 들여쓰기 · 배경 칠</td></tr>
 <tr><td>화자 위치에 맞추기</td><td>켜면 인용·내지에서도 오른쪽 화자의 세로선이 오른쪽에 서고 글자가 오른쪽으로 붙습니다</td></tr>
+<tr><td>크기 · 행간 · 자간</td><td>본문 기준값입니다. 제목·서명·소제목은 여기에 비례해 커지고 작아집니다</td></tr>
+<tr><td>정렬</td><td>왼쪽·가운데·오른쪽·양끝. 대화와 로그 판형에서는 대사 줄에 적용되지 않습니다</td></tr>
 <tr><td>색</td><td>본문·대사·제목·부제·소제목·형광펜을 각각 잡습니다</td></tr>
+<tr><td>제목 크기</td><td>본문 글자 크기의 몇 배로 할지. 부제는 제목의 절반쯤으로 따라갑니다</td></tr>
+<tr><td>그림자</td><td>사진 배경 위에서 글자가 묻힐 때 씁니다</td></tr>
+<tr><td>형광펜 모양</td><td>전체 칠 · 형광펜(아래 절반) · 밑줄 · 둥근 상자 · 선 상자</td></tr>
 </table>
 
 <div class="subhead">배경 탭</div>
@@ -722,7 +739,9 @@ table.gd code{display:inline-block;margin:1px 2px 1px 0}
 <table class="gd">
 <tr><td>테두리</td><td>얇은 선 · 이중선 · 모서리 · 점선. 색과 안쪽 여백을 조절합니다</td></tr>
 <tr><td>비네트 · 노이즈</td><td>가장자리 어둡게, 오래된 인쇄물 같은 입자</td></tr>
-<tr><td>서명</td><td>아이디와 작품명을 따로 넣고 사이에 꾸밈 기호를 고릅니다. 한쪽을 비우면 기호도 안 나옵니다</td></tr>
+<tr><td>서명</td><td>아이디와 작품명을 따로 넣고 사이에 꾸밈 기호를 고릅니다. 기호는 열두 가지와 직접 입력. 한쪽을 비우면 기호도 안 나옵니다</td></tr>
+<tr><td>서명 크기 · 위치</td><td>본문 크기의 몇 배로 할지, 왼쪽·가운데·오른쪽 어디에 둘지. 쪽번호는 반대쪽에 붙습니다</td></tr>
+<tr><td>서명 · 꾸밈 색</td><td>글자 색과 기호 색을 따로 잡습니다</td></tr>
 <tr><td>구분선</td><td>제목선과 서명선의 색·길이를 각각 잡습니다. 굵기만 함께 씁니다</td></tr>
 <tr><td>쪽번호</td><td>없음 · <code>1</code> · <code>1 / 3</code> · <code>— 1 —</code></td></tr>
 </table>
@@ -736,6 +755,18 @@ table.gd code{display:inline-block;margin:1px 2px 1px 0}
 <tr><td>이어붙여 한 장으로</td><td>모든 장을 세로로 붙여 긴 이미지 하나로 만듭니다. 장수 제한이 있는 곳에 올릴 때 씁니다</td></tr>
 <tr><td>프리셋</td><td>설정 전체를 이름 붙여 저장합니다. 사진이 크면 저장 공간이 차니 <b>파일로 내보내기</b>를 씁니다</td></tr>
 </table>
+
+<div class="subhead">화면 아래 막대</div>
+<table class="gd">
+<tr><td>↶ ↷</td><td>되돌리기와 다시 하기</td></tr>
+<tr><td>복사</td><td>지금 장을 클립보드로. 트위터에 바로 붙여넣을 때 편합니다</td></tr>
+<tr><td>이 장 저장 · 전체 저장</td><td>내보내기 탭의 같은 버튼입니다</td></tr>
+</table>
+
+<div class="subhead">미리보기</div>
+<p class="hint">
+미리보기 아래 ◀ ▶ 로 장을 넘깁니다. 지금 보고 있는 장이 <b>이 장 저장</b>과 <b>복사</b>의 대상입니다. 전체 저장이나 이어붙이기를 하면 잠깐 장이 자동으로 넘어갔다가 원래 보던 장으로 돌아옵니다.
+</p>
 
 <div class="subhead">장 나누기</div>
 <p class="hint">
@@ -1652,16 +1683,25 @@ const NAME_OK=n=>{
   if(/^[\"\u201c\u300c\u300e*]/.test(n))return false;
   return true;
 };
-function convertChat(raw,mode){
+function convertChat(raw,mode,defName){
   const lines=String(raw||'').split(/\r?\n/);
   const out=[];
+  const isNarr=L=>/^\*\*[\s\S]+\*\*$/.test(L)||/^\*[^*][\s\S]*\*$/.test(L);
   for(let i=0;i<lines.length;i++){
     const L=lines[i].trim();
     if(L===''){if(out.length&&out[out.length-1]!=='')out.push('');continue;}
     if(/^@[^:\uff1a]{1,24}[:\uff1a]/.test(L)){out.push(L);continue;}
     if(/^-{3,}$/.test(L)||/^#\s+/.test(L)){out.push(L);continue;}
+    if(isNarr(L)){out.push(L);continue;}
     const br=L.match(/^[\[\uff3b(\u3010]\s*([^\]\uff3d)\u3011]{1,16})\s*[\]\uff3d)\u3011]\s*[:\uff1a]?\s*(.*)$/);
     if(br&&br[2].trim()){out.push(`@${br[1].trim()}: ${br[2].trim()}`);continue;}
+    const bar=L.match(/^([^|\uff5c\u2502\u4e28]{1,16})\s*[|\uff5c\u2502\u4e28]\s*(.+)$/);
+    if(bar&&NAME_OK(bar[1])){out.push(`@${bar[1].trim()}: ${bar[2].trim()}`);continue;}
+    if(mode==='asterisk'){
+      const nm=(defName||'').trim();
+      out.push(nm?`@${nm}: ${L}`:(QUOTED.test(L)?L:`"${L}"`));
+      continue;
+    }
     if(mode==='same'){
       const m=L.match(/^([^:\uff1a]{1,16})\s*[:\uff1a]\s*(.+)$/);
       if(m&&NAME_OK(m[1])){out.push(`@${m[1].trim()}: ${m[2].trim()}`);continue;}
@@ -1669,7 +1709,7 @@ function convertChat(raw,mode){
     }
     if(NAME_OK(L)&&!/[,\u3001]/.test(L)){
       let j=i+1;while(j<lines.length&&lines[j].trim()==='')j++;
-      if(j<lines.length){out.push(`@${L}: ${lines[j].trim()}`);i=j;continue;}
+      if(j<lines.length&&!isNarr(lines[j].trim())){out.push(`@${L}: ${lines[j].trim()}`);i=j;continue;}
     }
     out.push(L);
   }
@@ -1679,7 +1719,7 @@ function convertChat(raw,mode){
 function applyConv(replace){
   const raw=$('convIn').value;
   if(!raw.trim()){toast('붙여넣은 내용이 없어요');return;}
-  const res=convertChat(raw,_convMode);
+  const res=convertChat(raw,_convMode,$('convName').value);
   const ta=$('script');
   ta.value=replace?res:(ta.value.replace(/\s+$/,'')+'\n\n'+res);
   S.script=ta.value;$('convIn').value='';
