@@ -1118,9 +1118,11 @@ function styleBub(bu,color,side){
     const t=document.createElement('div');
     const w=Math.max(7,Math.round(S.fsize*.24)),h=Math.max(5,Math.round(S.fsize*.17));
     const c=hexToRgba(color,.26*S.bubOp);
-    t.style.cssText=`position:absolute;top:${Math.round(S.fsize*.45)}px;width:0;height:0;`+
+    const top=Math.round(Math.max(S.bubRad*.8,S.fsize*.45));
+    const off=w-1;
+    t.style.cssText=`position:absolute;top:${top}px;width:0;height:0;`+
       `border-top:${h}px solid transparent;border-bottom:${h}px solid transparent;`+
-      (side==='right'?`right:-${w}px;border-left:${w}px solid ${c};`:`left:-${w}px;border-right:${w}px solid ${c};`);
+      (side==='right'?`right:-${off}px;border-left:${w}px solid ${c};`:`left:-${off}px;border-right:${w}px solid ${c};`);
     bu.appendChild(t);
   }
 }
