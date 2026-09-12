@@ -109,7 +109,8 @@ s{text-decoration-thickness:.06em;text-underline-offset:.1em}
 .row.center{justify-content:center}
 .av{flex:0 0 auto;border-radius:50%;display:grid;place-items:center;
   font-family:'Galmuri11',monospace;color:#181218;background-size:cover;background-position:center;overflow:hidden}
-.stack{display:flex;flex-direction:column;min-width:0;max-width:74%}
+.stack{display:flex;flex-direction:column;min-width:0;max-width:74%;align-items:flex-start}
+.row.right .stack{align-items:flex-end}
 .row.right .stack{align-items:flex-end}
 .nm{font-size:.62em;letter-spacing:.05em;opacity:.85;margin-bottom:.32em}
 .bub{padding:.62em .9em;word-break:break-word;position:relative}
@@ -384,6 +385,8 @@ table.gd code{display:inline-block;margin:1px 2px 1px 0}
           <input type="range" id="bubRad" min="0" max="48" step="1" value="22"></div>
         <div class="field"><label>불투명도 <span class="v" id="bubOpV">90%</span></label>
           <input type="range" id="bubOp" min="0" max="1" step=".01" value=".9"></div>
+        <div class="field"><label>말풍선 최대 너비 <span class="v" id="bubMaxV">74%</span></label>
+          <input type="range" id="bubMax" min="40" max="100" step="1" value="74"></div>
         <div class="field"><label>프로필 크기 <span class="v" id="avSizeV">56</span></label>
           <input type="range" id="avSize" min="0" max="120" step="2" value="56"></div>
         <div class="field"><label>이름표</label>
@@ -806,7 +809,7 @@ const DEFAULTS=()=>({
   cText:'#efe7d8', cDia:'#e8c98a', cTitle:'#efe7d8', cSub:'#efe7d8', cHead:'#efe7d8', cHl:'#e8c98a', hlOp:.4, hlStyle:'full', tsize:1.3, shadow:0,
   spk:{}, novelLabel:'none',
   bubRad:22, bubOp:.9, avSize:56, showName:true, bubBorder:true,
-  bubStyle:'fill', diaColor:'fixed', quoteStyle:'plain', quoteFollowSide:false, lineSide:'left', talkNarrAlign:'center',
+  bubMax:74, bubStyle:'fill', diaColor:'fixed', quoteStyle:'plain', quoteFollowSide:false, lineSide:'left', talkNarrAlign:'center',
   bgMode:'gradient', gradFrom:'#ffe19a', gradMid:'#5a93a8', gradTo:'#13314a',
   gradAngle:165, gradPreset:'\ucb4c', bgSolid:'#141019',
   paperColor:'#efe7d8', paperGrain:.4,
@@ -985,7 +988,7 @@ function talkEl(b){
     const sd=S.lineSide||'left';
     row.className='row '+sd;
     if(S.avSize>0&&sd!=='center'){const sp2=document.createElement('div');sp2.style.cssText=`flex:0 0 auto;width:${S.avSize}px`;row.appendChild(sp2);}
-    const st=document.createElement('div');st.className='stack';
+    const st=document.createElement('div');st.className='stack';st.style.maxWidth=(S.bubMax||74)+'%';
     const bu=document.createElement('div');bu.className='bub';
     bu.innerHTML=inline(b.text);styleBub(bu,S.cDia,S.lineSide||'left');
     st.appendChild(bu);row.appendChild(st);return row;
@@ -1015,17 +1018,10 @@ function talkEl(b){
       row.appendChild(av);
     }
   }
-  const st=document.createElement('div');st.className='stack';
+  const st=document.createElement('div');st.className='stack';st.style.maxWidth=(S.bubMax||74)+'%';
   if(S.showName&&!cont){const nm=document.createElement('div');nm.className='nm';nm.textContent=b.who;nm.style.color=sp.color;st.appendChild(nm);}
   const bu=document.createElement('div');bu.className='bub';
   bu.innerHTML=inline(b.text);styleBub(bu,sp.color,sp.side||'left');
-  if(sp.av===false&&(sp.side||'left')!=='center'){
-    st.style.maxWidth='100%';st.style.width='100%';
-    const st2=S.bubStyle;
-    if(st2==='fill'||st2==='outline'||st2==='solid'||st2==='tail'){
-      if((sp.side||'left')==='right')bu.style.marginRight='-.9em';else bu.style.marginLeft='-.9em';
-    }
-  }
   st.appendChild(bu);row.appendChild(st);return row;
 }
 function logEl(b){
@@ -1384,6 +1380,7 @@ bindRange('shadow','shadow',v=>Math.round(v*100)+'%');
 bindRange('bubRad','bubRad',v=>v);
 bindRange('bubOp','bubOp',v=>Math.round(v*100)+'%');
 bindRange('avSize','avSize',v=>v);
+bindRange('bubMax','bubMax',v=>v+'%');
 bindRange('gradAngle','gradAngle',v=>v+'\u00b0');
 bindRange('ovOpacity','ovOpacity',v=>Math.round(v*100)+'%');
 bindRange('paperGrain','paperGrain',v=>Math.round(v*100)+'%');
@@ -1548,7 +1545,7 @@ function applyState(o){
   const set=(id,v,t)=>{if($(id)){$(id).value=v;const l=$(id+'V');if(l)l.textContent=t;}};
   set('pad',S.pad,S.pad);set('fsize',S.fsize,S.fsize);set('lh',S.lh,(+S.lh).toFixed(2));set('ls',S.ls,S.ls);
   set('tsize',S.tsize,(+S.tsize).toFixed(2)+'\u00d7');set('shadow',S.shadow,Math.round(S.shadow*100)+'%');set('hlOp',S.hlOp,Math.round(S.hlOp*100)+'%');
-  set('bubRad',S.bubRad,S.bubRad);set('bubOp',S.bubOp,Math.round(S.bubOp*100)+'%');set('avSize',S.avSize,S.avSize);
+  set('bubRad',S.bubRad,S.bubRad);set('bubOp',S.bubOp,Math.round(S.bubOp*100)+'%');set('avSize',S.avSize,S.avSize);set('bubMax',S.bubMax,S.bubMax+'%');
   set('gradAngle',S.gradAngle,S.gradAngle+'\u00b0');set('ovOpacity',S.ovOpacity,Math.round(S.ovOpacity*100)+'%');
   set('paperGrain',S.paperGrain,Math.round(S.paperGrain*100)+'%');set('frameInset',S.frameInset,S.frameInset);
   set('vig',S.vig,Math.round(S.vig*100)+'%');set('grainAmt',S.grainAmt,Math.round(S.grainAmt*100)+'%');
