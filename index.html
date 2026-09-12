@@ -276,6 +276,12 @@ input[type=color]{width:100%;height:28px;padding:0;border:1px solid var(--line);
           </div>
           <p class="hint" style="margin-top:7px">비율을 넣으면 긴 쪽을 1200px에 맞춰 계산해요. 200~4000px까지 돼요.</p>
         </div>
+        <div class="field"><label>본문 세로 위치</label>
+          <div class="seg" id="bodyYSeg">
+            <button data-v="top">위부터</button><button data-v="center">가운데</button>
+            <button data-v="bottom">아래</button>
+          </div>
+        </div>
         <div class="field"><label>여백 <span class="v" id="padV">72</span></label>
           <input type="range" id="pad" min="16" max="200" step="2" value="72"></div>
       </div></section>
@@ -633,7 +639,7 @@ const SAMPLE=`# \uc18c\uc81c\ubaa9\uc740 \uc774\ub807\uac8c\n\n@\ud654\uc790A: \
 const PALETTE=['#e8c98a','#8fb8d8','#d89aa8','#9dc79b','#c3a3e0','#e0a878','#7fc7c0','#dba3c7'];
 
 const DEFAULTS=()=>({
-  mode:'quote', ratio:'1:1', cw:1080, ch:1350, pad:72,
+  mode:'quote', ratio:'1:1', cw:1080, ch:1350, pad:72, bodyY:'top',
   title:'', subtitle:'', titleMode:'first', script:SAMPLE,
   titleRule:'bottom', ruleWeight:1.5, titleRuleWidth:100, signRuleWidth:100, signRule:'top', quoteLine:'inherit',
   titleRuleColor:'#efe7d8', signRuleColor:'#c8a45c',
@@ -959,6 +965,9 @@ function renderPage(i){
   $('sheetHead').innerHTML=showHead?headHTML():'';
   $('sheetFoot').innerHTML=footHTML(i,total);
   const body=$('sheetBody');body.innerHTML='';
+  if(S.mode==='quote'){body.style.display='block';body.style.justifyContent='';}
+  else{body.style.display='flex';body.style.flexDirection='column';
+    body.style.justifyContent=S.bodyY==='center'?'center':(S.bodyY==='bottom'?'flex-end':'flex-start');}
   const wrap=document.createElement('div');
   if(S.mode==='quote')wrap.className='quote-wrap';
   _prevWho=null;
@@ -1113,6 +1122,7 @@ function bindSeg(id,key,after){
 }
 
 bindSeg('modeSeg','mode',()=>{PG=0;$('modeHint').textContent=MODE_HINT[S.mode];});
+bindSeg('bodyYSeg','bodyY');
 bindSeg('ratioSeg','ratio',()=>{PG=0;$('customRatio').style.display=S.ratio==='custom'?'block':'none';});
 function clampSize(v,d){v=parseInt(v);if(!isFinite(v))return d;return Math.max(200,Math.min(4000,v));}
 $('cw').addEventListener('change',()=>{S.cw=clampSize($('cw').value,1080);$('cw').value=S.cw;renderAll();});
@@ -1347,7 +1357,7 @@ function applyState(o){
   const seg=(id,val)=>{if($(id))[...$(id).children].forEach(c=>{
     let cv=c.dataset.v;if(cv==='on')cv=true;if(cv==='off')cv=false;
     c.classList.toggle('active',String(cv)===String(val));});};
-  seg('modeSeg',S.mode);seg('ratioSeg',S.ratio);seg('titleModeSeg',S.titleMode);seg('alignSeg',S.align);
+  seg('modeSeg',S.mode);seg('ratioSeg',S.ratio);seg('bodyYSeg',S.bodyY);seg('titleModeSeg',S.titleMode);seg('alignSeg',S.align);
   seg('novelLabelSeg',S.novelLabel);seg('showNameSeg',S.showName);seg('bubBorderSeg',S.bubBorder);
   seg('bubStyleSeg',S.bubStyle);seg('diaColorSeg',S.diaColor);seg('quoteStyleSeg',S.quoteStyle);seg('quoteFollowSeg',S.quoteFollowSide);seg('lineSideSeg',S.lineSide);seg('talkNarrAlignSeg',S.talkNarrAlign);
   seg('frameSeg',S.frame);seg('signAlignSeg',S.signAlign);seg('pageNumSeg',S.pageNum);
@@ -1566,7 +1576,7 @@ $('btnSaveStack').addEventListener('click',saveStacked);
 document.body.appendChild($('measure'));
 $('script').value=S.script;
 $('modeHint').textContent=MODE_HINT[S.mode];
-['modeSeg:mode','ratioSeg:ratio','titleModeSeg:titleMode','alignSeg:align','novelLabelSeg:novelLabel',
+['modeSeg:mode','ratioSeg:ratio','bodyYSeg:bodyY','titleModeSeg:titleMode','alignSeg:align','novelLabelSeg:novelLabel',
  'showNameSeg:showName','bubBorderSeg:bubBorder','frameSeg:frame','signAlignSeg:signAlign',
  'pageNumSeg:pageNum','formatSeg:format','bgModeSeg:bgMode','titleRuleSeg:titleRule',
  'signRuleSeg:signRule','quoteLineSeg:quoteLine','signSepSeg:signSep','transSeg:transparent','bubStyleSeg:bubStyle','diaColorSeg:diaColor',
