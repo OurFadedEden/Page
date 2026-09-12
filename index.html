@@ -1436,6 +1436,8 @@ function renderGenko(rows,wrap){
   const lw=Math.max(.5,S.gkLine);
   const gcol=hexToRgba(S.gkColor,S.gkOp);
   wrap.style.fontFamily=S.font;
+  wrap.style.width=(cols*size-lw)+'px';
+  wrap.style.marginLeft='auto';wrap.style.marginRight='auto';
   (rows||[]).forEach(r=>{
     const row=document.createElement('div');
     row.style.cssText=`display:flex;margin-bottom:${gap}px`;
