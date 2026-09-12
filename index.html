@@ -787,6 +787,33 @@ table.gd code{display:inline-block;margin:1px 2px 1px 0}
   <button id="barOne">이 장 저장</button>
   <button class="pri" id="barAll">전체 저장</button>
 </div>
+<div class="modal" id="noticeModal"><div class="modal-box">
+<div class="modal-top"><strong>공지</strong><button id="noticeX">✕</button></div>
+<div class="modal-body">
+<p class="hint" style="font-size:12px;line-height:1.9;color:var(--text)">
+넷리파이 링크의 무료 사용량을 다 써서 <b>주소를 옮겼습니다.</b><br>
+앞으로는 아래 주소를 이용해 주세요.
+</p>
+<a class="btn pri" id="noticeLink" href="https://ourfadededen.github.io/Page/" target="_blank" rel="noopener"
+   style="display:block;text-align:center;text-decoration:none;padding:11px">ourfadededen.github.io/Page/</a>
+
+<div class="subhead">저장해둔 프리셋 옮기기</div>
+<p class="hint">
+프리셋은 주소마다 따로 보관돼서 <b>자동으로 따라오지 않습니다.</b> 옮기려면 이렇게 해주세요.
+</p>
+<table class="gd">
+<tr><td>1</td><td>예전 주소에서 <b>내보내기 → 파일로 내보내기</b>를 눌러 설정 파일을 받습니다</td></tr>
+<tr><td>2</td><td>새 주소로 옮겨옵니다</td></tr>
+<tr><td>3</td><td><b>내보내기 → 파일 불러오기</b>로 그 파일을 엽니다</td></tr>
+<tr><td>4</td><td>이름을 적고 <b>저장</b>을 눌러 프리셋으로 다시 담아둡니다</td></tr>
+</table>
+<p class="hint">화자 세트를 쓰고 있다면 세트마다 한 번씩 불러온 뒤 저장해 주세요.</p>
+
+<div class="grid2" style="margin-top:6px">
+  <button class="btn ghost" id="noticeClose">닫기</button>
+  <button class="btn" id="noticeNever">다시 보지 않기</button>
+</div>
+</div></div></div>
 <div class="modal" id="guideModal"><div class="modal-box"><div class="modal-top"><strong>가이드</strong><button id="guideClose">✕</button></div><div class="modal-body">
 
 <div class="subhead">이렇게 씁니다</div>
@@ -2398,6 +2425,18 @@ $('stkDel').addEventListener('click',()=>{
   S.stickers=(S.stickers||[]).filter(x=>x.id!==STK_SEL);STK_SEL=null;selectSticker(null);
 });
 
+/* ---------- 공지 ---------- */
+(function(){
+  const NKEY='bindery_notice_v1';
+  const m=$('noticeModal');
+  const close=()=>m.classList.remove('on');
+  $('noticeX').addEventListener('click',close);
+  $('noticeClose').addEventListener('click',close);
+  $('noticeNever').addEventListener('click',()=>{store.set(NKEY,1);close();});
+  m.addEventListener('click',e=>{if(e.target===m)close();});
+  if(!store.get(NKEY))setTimeout(()=>m.classList.add('on'),350);
+})();
+
 /* ---------- 가이드 ---------- */
 (function(){
   const m=$('guideModal');
@@ -2405,7 +2444,7 @@ $('stkDel').addEventListener('click',()=>{
   $('guideBtn').addEventListener('click',open);
   $('guideClose').addEventListener('click',close);
   m.addEventListener('click',e=>{if(e.target===m)close();});
-  document.addEventListener('keydown',e=>{if(e.key==='Escape')close();});
+  document.addEventListener('keydown',e=>{if(e.key==='Escape'){close();$('noticeModal').classList.remove('on');}});
 })();
 
 /* ---------- 탭 ---------- */
