@@ -1436,11 +1436,9 @@ function renderGenko(rows,wrap){
   const lw=Math.max(.5,S.gkLine);
   const gcol=hexToRgba(S.gkColor,S.gkOp);
   wrap.style.fontFamily=S.font;
-  wrap.style.width=(cols*size-lw)+'px';
-  wrap.style.marginLeft='auto';wrap.style.marginRight='auto';
   (rows||[]).forEach(r=>{
     const row=document.createElement('div');
-    row.style.cssText=`display:flex;margin-bottom:${gap}px`;
+    row.style.cssText=`display:flex;justify-content:center;margin-bottom:${gap}px`;
     if(r.div){
       row.style.cssText+=`;height:${size}px;align-items:center;justify-content:center;`
         +`color:${S.dividerColor};font-size:${Math.round(size*.7)}px;letter-spacing:.4em`;
