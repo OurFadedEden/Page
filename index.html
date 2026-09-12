@@ -907,7 +907,7 @@ function syncSpeakers(blocks){
   });
   return names;
 }
-function spkOf(n){const o=S.spk[n]||{color:'#e8c98a',side:'left',img:null};if(o.av===undefined)o.av=true;return o;}
+function spkOf(n){const o=S.spk[n]||{color:'#e8c98a',side:'left',img:null};if(o.av===undefined)o.av=true;if(!o.nmColor)o.nmColor=o.color;return o;}
 
 /* ---------- 조판 ---------- */
 function applyTypo(el){
@@ -946,7 +946,7 @@ function blockEl(b){
     if(!QUOTED.test(body))body='"'+body+'"';
     let html=inline(body);
     if(S.novelLabel==='inline'&&b.t==='say'&&!b.anon){
-      html=`<span class="b-name" style="color:${col}">${esc(b.who)}</span>`+html;
+      html=`<span class="b-name" style="color:${spkOf(b.who).nmColor||col}">${esc(b.who)}</span>`+html;
     }
     d.innerHTML=html;return d;
   }
@@ -1019,7 +1019,7 @@ function talkEl(b){
     }
   }
   const st=document.createElement('div');st.className='stack';st.style.maxWidth=(S.bubMax||74)+'%';
-  if(S.showName&&!cont){const nm=document.createElement('div');nm.className='nm';nm.textContent=b.who;nm.style.color=sp.color;st.appendChild(nm);}
+  if(S.showName&&!cont){const nm=document.createElement('div');nm.className='nm';nm.textContent=b.who;nm.style.color=sp.nmColor||sp.color;st.appendChild(nm);}
   const bu=document.createElement('div');bu.className='bub';
   bu.innerHTML=inline(b.text);styleBub(bu,sp.color,sp.side||'left');
   st.appendChild(bu);row.appendChild(st);return row;
@@ -1028,7 +1028,7 @@ function logEl(b){
   const d=document.createElement('div');d.className='lg';
   const tag=document.createElement('span');tag.className='tag';
   const bd=document.createElement('span');bd.className='bd';
-  if(b.t==='say'){const sp=spkOf(b.who);tag.textContent='['+b.who+']';tag.style.color=sp.color;bd.innerHTML=inline(b.text);
+  if(b.t==='say'){const sp=spkOf(b.who);tag.textContent='['+b.who+']';tag.style.color=sp.nmColor||sp.color;bd.innerHTML=inline(b.text);
     bd.style.setProperty('--c-dia',S.diaColor==='speaker'?sp.color:S.cDia);}
   else if(b.t==='line'){tag.textContent='\u300c\u300d';tag.style.color=S.cDia;bd.innerHTML=inline(b.text);bd.style.setProperty('--c-dia',S.cDia);}
   else{d.className='lg narr';tag.textContent='\u203a';bd.innerHTML=inline(b.text);}
@@ -1216,8 +1216,10 @@ function renderSpeakerList(blocks){
         ${inScript?'':'<span class="spk-tag">본문에 없음</span>'}
         <button class="btn ghost" data-a="del" style="width:auto;padding:5px 8px;font-size:11px">\u2715</button>
       </div>
-      <div class="spk-row"><span style="font-size:10.5px;color:var(--muted)">색</span>
+      <div class="spk-row"><span style="font-size:10.5px;color:var(--muted)">말풍선</span>
         <input type="color" data-a="color"></div>
+      <div class="spk-row"><span style="font-size:10.5px;color:var(--muted)">이름</span>
+        <input type="color" data-a="nmColor"></div>
       <div class="spk-row"><span style="font-size:10.5px;color:var(--muted)">위치</span>
         <div class="seg" data-a="side">
           <button data-v="left">왼쪽</button><button data-v="right">오른쪽</button><button data-v="center">가운데</button>
@@ -1237,7 +1239,11 @@ function renderSpeakerList(blocks){
     if(sp.img){av.style.backgroundImage=`url(${sp.img})`;av.textContent='';}
     else{av.style.background=sp.color;av.textContent=n[0]||'?';}
     const col=card.querySelector('[data-a=color]');col.value=sp.color;
-    col.addEventListener('input',()=>{S.spk[n].color=col.value;renderAll();});
+    col.addEventListener('input',()=>{const old=S.spk[n].color;
+      if(!S.spk[n].nmColor||S.spk[n].nmColor===old)S.spk[n].nmColor=col.value;
+      S.spk[n].color=col.value;renderAll();});
+    const ncol=card.querySelector('[data-a=nmColor]');ncol.value=sp.nmColor||sp.color;
+    ncol.addEventListener('input',()=>{S.spk[n].nmColor=ncol.value;renderAll();});
     card.querySelectorAll('[data-a=side] button').forEach(b=>{
       b.classList.toggle('active',b.dataset.v===sp.side);
       b.addEventListener('click',()=>{S.spk[n].side=b.dataset.v;renderAll();});
