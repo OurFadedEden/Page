@@ -323,6 +323,8 @@ table.gd code{display:inline-block;margin:1px 2px 1px 0}
             <button data-v="solo">화자 없는 대사</button>
             <button data-v="off">지문으로</button>
           </div></div>
+        <div class="field"><label>제목 위아래 이동 <span class="v" id="titleYV">0</span></label>
+          <input type="range" id="titleY" min="-300" max="300" step="2" value="0"></div>
         <div class="field"><label>제목 구분선</label>
           <div class="seg" id="titleRuleSeg">
             <button data-v="none">없음</button><button data-v="top">위</button>
@@ -457,6 +459,12 @@ table.gd code{display:inline-block;margin:1px 2px 1px 0}
             <button data-v="plain">그대로</button><button data-v="bar">세로선</button>
             <button data-v="indent">들여쓰기</button><button data-v="block">배경 칠</button>
           </div></div>
+        <div class="field"><label>세로선 · 배경 칠 색</label>
+          <div class="seg" id="barModeSeg">
+            <button data-v="auto">대사 색 따라감</button><button data-v="fixed">직접 지정</button>
+          </div></div>
+        <div class="field" id="barColorField" style="display:none"><label>세로선 색</label>
+          <input type="color" id="barColor" value="#c8a45c"></div>
         <div class="field"><label>대사를 화자 위치에 맞추기</label>
           <div class="seg" id="quoteFollowSeg">
             <button data-v="off">모두 왼쪽</button><button data-v="on">화자 위치 따라</button>
@@ -481,6 +489,11 @@ table.gd code{display:inline-block;margin:1px 2px 1px 0}
             <input type="range" id="tsize" min=".6" max="3" step=".05" value="1.3"></div>
           <div class="field"><label>그림자 <span class="v" id="shadowV">0%</span></label>
             <input type="range" id="shadow" min="0" max="1" step=".02" value="0"></div>
+        </div>
+        <div class="grid2">
+          <div class="field"><label>외곽선 <span class="v" id="strokeWV">0</span></label>
+            <input type="range" id="strokeW" min="0" max="6" step=".5" value="0"></div>
+          <div class="field"><label>외곽선 색</label><input type="color" id="strokeColor" value="#000000"></div>
         </div>
       </div></section>
 <section class="pane" data-t="bg"><div class="sec-in">
@@ -584,6 +597,12 @@ table.gd code{display:inline-block;margin:1px 2px 1px 0}
         <div class="field"><label>서명 위치</label>
           <div class="seg" id="signAlignSeg">
             <button data-v="left">왼쪽</button><button data-v="center">가운데</button><button data-v="right">오른쪽</button></div></div>
+        <div class="grid2">
+          <div class="field"><label>서명 좌우 <span class="v" id="signXV">0</span></label>
+            <input type="range" id="signX" min="-300" max="300" step="2" value="0"></div>
+          <div class="field"><label>서명 위아래 <span class="v" id="signYV">0</span></label>
+            <input type="range" id="signY" min="-300" max="300" step="2" value="0"></div>
+        </div>
         <div class="field"><label>서명 구분선</label>
           <div class="seg" id="signRuleSeg">
             <button data-v="none">없음</button><button data-v="top">위</button></div></div>
@@ -723,7 +742,8 @@ table.gd code{display:inline-block;margin:1px 2px 1px 0}
 <tr><td>정렬</td><td>왼쪽·가운데·오른쪽·양끝. 대화와 로그 판형에서는 대사 줄에 적용되지 않습니다</td></tr>
 <tr><td>색</td><td>본문·대사·제목·부제·소제목·형광펜을 각각 잡습니다</td></tr>
 <tr><td>제목 크기</td><td>본문 글자 크기의 몇 배로 할지. 부제는 제목의 절반쯤으로 따라갑니다</td></tr>
-<tr><td>그림자</td><td>사진 배경 위에서 글자가 묻힐 때 씁니다</td></tr>
+<tr><td>그림자 · 외곽선</td><td>사진이나 밝은 배경 위에서 글자가 묻힐 때 씁니다. 외곽선은 굵기와 색을 따로 잡습니다</td></tr>
+<tr><td>세로선 색</td><td>인용·내지의 대사 세로선과 배경 칠 색. 대사 색을 따라가거나 직접 지정합니다</td></tr>
 <tr><td>형광펜 모양</td><td>전체 칠 · 형광펜(아래 절반) · 밑줄 · 둥근 상자 · 선 상자</td></tr>
 </table>
 
@@ -741,6 +761,7 @@ table.gd code{display:inline-block;margin:1px 2px 1px 0}
 <tr><td>비네트 · 노이즈</td><td>가장자리 어둡게, 오래된 인쇄물 같은 입자</td></tr>
 <tr><td>서명</td><td>아이디와 작품명을 따로 넣고 사이에 꾸밈 기호를 고릅니다. 기호는 열두 가지와 직접 입력. 한쪽을 비우면 기호도 안 나옵니다</td></tr>
 <tr><td>서명 크기 · 위치</td><td>본문 크기의 몇 배로 할지, 왼쪽·가운데·오른쪽 어디에 둘지. 쪽번호는 반대쪽에 붙습니다</td></tr>
+<tr><td>서명 미세 이동</td><td>좌우·위아래로 픽셀 단위로 밀 수 있습니다. 제목도 원고 탭에서 위아래로 밉니다</td></tr>
 <tr><td>서명 · 꾸밈 색</td><td>글자 색과 기호 색을 따로 잡습니다</td></tr>
 <tr><td>구분선</td><td>제목선과 서명선의 색·길이를 각각 잡습니다. 굵기만 함께 씁니다</td></tr>
 <tr><td>쪽번호</td><td>없음 · <code>1</code> · <code>1 / 3</code> · <code>— 1 —</code></td></tr>
@@ -837,7 +858,8 @@ const DEFAULTS=()=>({
   titleRule:'bottom', ruleWeight:1.5, titleRuleWidth:100, signRuleWidth:100, signRule:'top', quoteLine:'inherit',
   titleRuleColor:'#efe7d8', signRuleColor:'#c8a45c',
   font:"'Ridibatang', serif", fsize:40, lh:1.8, ls:0, align:'left',
-  cText:'#efe7d8', cDia:'#e8c98a', cTitle:'#efe7d8', cSub:'#efe7d8', cHead:'#efe7d8', cHl:'#e8c98a', hlOp:.4, hlStyle:'full', tsize:1.3, shadow:0,
+  cText:'#efe7d8', cDia:'#e8c98a', cTitle:'#efe7d8', cSub:'#efe7d8', cHead:'#efe7d8', cHl:'#e8c98a', hlOp:.4, hlStyle:'full', strokeW:0, strokeColor:'#000000',
+  titleY:0, signX:0, signY:0, barMode:'auto', barColor:'#c8a45c', tsize:1.3, shadow:0,
   spk:{}, novelLabel:'none',
   bubRad:22, bubOp:.9, avSize:56, showName:true, bubBorder:true,
   bubMax:74, bubStyle:'fill', diaColor:'fixed', quoteStyle:'plain', quoteFollowSide:false, lineSide:'left', talkNarrAlign:'center',
@@ -941,6 +963,17 @@ function syncSpeakers(blocks){
 function spkOf(n){const o=S.spk[n]||{color:'#e8c98a',side:'left',img:null};if(o.av===undefined)o.av=true;if(!o.nmColor)o.nmColor=o.color;return o;}
 
 /* ---------- 조판 ---------- */
+function buildShadow(){
+  const out=[];
+  const w=+S.strokeW||0;
+  if(w>0){
+    const c=S.strokeColor;
+    [[-1,-1],[0,-1],[1,-1],[-1,0],[1,0],[-1,1],[0,1],[1,1],[-1.4,0],[1.4,0],[0,-1.4],[0,1.4]]
+      .forEach(d=>out.push(`${(d[0]*w).toFixed(2)}px ${(d[1]*w).toFixed(2)}px 0 ${c}`));
+  }
+  if(S.shadow>0)out.push(`0 ${Math.round(S.fsize*.06)}px ${Math.round(S.fsize*.28)}px rgba(0,0,0,${S.shadow})`);
+  return out.length?out.join(', '):'none';
+}
 function applyTypo(el){
   el.style.fontFamily=S.font;
   el.style.fontSize=S.fsize+'px';
@@ -950,7 +983,7 @@ function applyTypo(el){
   el.style.color=S.cText;
   el.style.setProperty('--c-dia',S.cDia);
   el.style.setProperty('--c-hl',hexToRgba(S.cHl,S.hlOp));
-  el.style.textShadow=S.shadow>0?`0 ${Math.round(S.fsize*.06)}px ${Math.round(S.fsize*.28)}px rgba(0,0,0,${S.shadow})`:'none';
+  el.style.textShadow=buildShadow();
 }
 let _prevWho=null;
 function blockEl(b){
@@ -965,13 +998,13 @@ function blockEl(b){
     d.style.setProperty('--c-dia',col);
     const sd=(S.quoteFollowSide&&b.t==='say'&&b.who)?(spkOf(b.who).side||'left'):'left';
     const w=Math.max(2,Math.round(S.fsize*.07));
+    const bcol=S.barMode==='fixed'?S.barColor:col;
     if(S.quoteStyle==='bar'){
-      if(sd==='right'){d.style.borderRight=`${w}px solid ${col}`;d.style.paddingRight='.7em';}
-      else if(sd==='center'){d.style.borderLeft=`${w}px solid ${col}`;d.style.paddingLeft='.7em';}
-      else{d.style.borderLeft=`${w}px solid ${col}`;d.style.paddingLeft='.7em';}
+      if(sd==='right'){d.style.borderRight=`${w}px solid ${bcol}`;d.style.paddingRight='.7em';}
+      else{d.style.borderLeft=`${w}px solid ${bcol}`;d.style.paddingLeft='.7em';}
     }
     else if(S.quoteStyle==='indent'){d.style[sd==='right'?'paddingRight':'paddingLeft']='1.6em';}
-    else if(S.quoteStyle==='block'){d.style.background=hexToRgba(col,.13);d.style.padding='.45em .7em';d.style.borderRadius=Math.round(S.fsize*.16)+'px';}
+    else if(S.quoteStyle==='block'){d.style.background=hexToRgba(bcol,.13);d.style.padding='.45em .7em';d.style.borderRadius=Math.round(S.fsize*.16)+'px';}
     if(S.quoteFollowSide&&b.t==='say'&&b.who)d.style.textAlign=sd==='center'?'center':sd;
     let body=b.text;
     if(!QUOTED.test(body))body='"'+body+'"';
@@ -1076,7 +1109,7 @@ function headHTML(){
   const ts=Math.round(S.fsize*S.tsize);
   const ta=S.align==='justify'?'left':S.align;
   const g=Math.round(S.fsize*.5);
-  let h=`<div style="padding-bottom:${Math.round(S.fsize*.9)}px;text-align:${ta}">`;
+  let h=`<div style="padding-bottom:${Math.round(S.fsize*.9)}px;text-align:${ta};position:relative;top:${S.titleY||0}px">`;
   if(S.titleRule==='top'||S.titleRule==='both')h+=ruleHTML(S.titleRuleColor,ta,0,g,S.titleRuleWidth);
   if(S.title.trim())h+=`<h2 class="s-title" style="font-size:${ts}px;color:${S.cTitle};font-family:${S.font};letter-spacing:${S.ls}px">${inline(S.title)}</h2>`;
   if(S.subtitle.trim())h+=`<p class="s-sub" style="font-size:${Math.round(ts*.42)}px;color:${S.cSub};font-family:${S.font}">${inline(S.subtitle)}</p>`;
@@ -1102,7 +1135,7 @@ function footHTML(pageIdx,total){
   const order=S.signAlign==='right'?pg+sign:sign+pg;
   const just=S.signAlign==='center'?'center':'space-between';
   const rule=S.signRule!=='none'?ruleHTML(S.signRuleColor,S.signAlign,0,Math.round(fs*.75),S.signRuleWidth):'';
-  return `<div style="padding-top:${Math.round(S.fsize*.8)}px">${rule}<div class="s-foot" style="font-size:${fs}px;font-family:${S.font};justify-content:${just};gap:${Math.round(fs*1.2)}px">${order}</div></div>`;
+  return `<div style="padding-top:${Math.round(S.fsize*.8)}px;position:relative;left:${S.signX||0}px;top:${S.signY||0}px">${rule}<div class="s-foot" style="font-size:${fs}px;font-family:${S.font};justify-content:${just};gap:${Math.round(fs*1.2)}px">${order}</div></div>`;
 }
 
 /* ---------- 화면 ---------- */
@@ -1385,6 +1418,7 @@ bindSeg('bubStyleSeg','bubStyle');
 bindSeg('diaColorSeg','diaColor');
 bindSeg('quoteStyleSeg','quoteStyle');
 bindSeg('quoteFollowSeg','quoteFollowSide');
+bindSeg('barModeSeg','barMode',()=>{$('barColorField').style.display=S.barMode==='fixed'?'flex':'none';});
 bindSeg('lineSideSeg','lineSide');
 bindSeg('talkNarrAlignSeg','talkNarrAlign');
 bindSeg('frameSeg','frame');
@@ -1413,6 +1447,10 @@ bindRange('lh','lh',v=>v.toFixed(2));
 bindRange('ls','ls',v=>v);
 bindRange('tsize','tsize',v=>v.toFixed(2)+'\u00d7');
 bindRange('shadow','shadow',v=>Math.round(v*100)+'%');
+bindRange('strokeW','strokeW',v=>v);
+bindRange('titleY','titleY',v=>v);
+bindRange('signX','signX',v=>v);
+bindRange('signY','signY',v=>v);
 bindRange('bubRad','bubRad',v=>v);
 bindRange('bubOp','bubOp',v=>Math.round(v*100)+'%');
 bindRange('avSize','avSize',v=>v);
@@ -1440,7 +1478,7 @@ bindRange('hlOp','hlOp',v=>Math.round(v*100)+'%');
 bindColor('gradFrom','gradFrom');bindColor('gradMid','gradMid');bindColor('gradTo','gradTo');
 bindColor('bgSolid','bgSolid');bindColor('paperColor','paperColor');
 bindColor('ovColor','ovColor');bindColor('frameColor','frameColor');bindColor('signColor','signColor');
-bindColor('sepColor','sepColor');bindColor('titleRuleColor','titleRuleColor');bindColor('signRuleColor','signRuleColor');
+bindColor('strokeColor','strokeColor');bindColor('barColor','barColor');bindColor('sepColor','sepColor');bindColor('titleRuleColor','titleRuleColor');bindColor('signRuleColor','signRuleColor');
 
 $('font').addEventListener('change',()=>{S.font=$('font').value;renderAll();});
 $('fontUploadBtn').addEventListener('click',()=>$('fontFile').click());
@@ -1576,11 +1614,12 @@ function applyState(o){
   $('title').value=S.title;$('subtitle').value=S.subtitle;$('sign').value=S.sign;
   $('sign2').value=S.sign2||'';$('signSepCustom').value=S.signSepCustom||'';
   $('script').value=S.script;$('font').value=S.font;
-  ['cText','cDia','cTitle','cSub','cHead','cHl','gradFrom','gradMid','gradTo','bgSolid','paperColor','ovColor','frameColor','signColor','sepColor','titleRuleColor','signRuleColor']
+  ['cText','cDia','cTitle','cSub','cHead','cHl','strokeColor','barColor','gradFrom','gradMid','gradTo','bgSolid','paperColor','ovColor','frameColor','signColor','sepColor','titleRuleColor','signRuleColor']
     .forEach(k=>{if($(k))$(k).value=S[k];});
   const set=(id,v,t)=>{if($(id)){$(id).value=v;const l=$(id+'V');if(l)l.textContent=t;}};
   set('pad',S.pad,S.pad);set('fsize',S.fsize,S.fsize);set('lh',S.lh,(+S.lh).toFixed(2));set('ls',S.ls,S.ls);
-  set('tsize',S.tsize,(+S.tsize).toFixed(2)+'\u00d7');set('shadow',S.shadow,Math.round(S.shadow*100)+'%');set('hlOp',S.hlOp,Math.round(S.hlOp*100)+'%');
+  set('tsize',S.tsize,(+S.tsize).toFixed(2)+'\u00d7');set('shadow',S.shadow,Math.round(S.shadow*100)+'%');set('hlOp',S.hlOp,Math.round(S.hlOp*100)+'%');set('strokeW',S.strokeW,S.strokeW);
+  set('titleY',S.titleY,S.titleY);set('signX',S.signX,S.signX);set('signY',S.signY,S.signY);
   set('bubRad',S.bubRad,S.bubRad);set('bubOp',S.bubOp,Math.round(S.bubOp*100)+'%');set('avSize',S.avSize,S.avSize);set('bubMax',S.bubMax,S.bubMax+'%');
   set('gradAngle',S.gradAngle,S.gradAngle+'\u00b0');set('ovOpacity',S.ovOpacity,Math.round(S.ovOpacity*100)+'%');
   set('paperGrain',S.paperGrain,Math.round(S.paperGrain*100)+'%');set('frameInset',S.frameInset,S.frameInset);
@@ -1596,7 +1635,8 @@ function applyState(o){
     c.classList.toggle('active',String(cv)===String(val));});};
   seg('modeSeg',S.mode);seg('ratioSeg',S.ratio);seg('bodyYSeg',S.bodyY);seg('titleModeSeg',S.titleMode);seg('alignSeg',S.align);
   seg('novelLabelSeg',S.novelLabel);seg('showNameSeg',S.showName);seg('bubBorderSeg',S.bubBorder);
-  seg('bubStyleSeg',S.bubStyle);seg('diaColorSeg',S.diaColor);seg('quoteStyleSeg',S.quoteStyle);seg('quoteFollowSeg',S.quoteFollowSide);seg('hlStyleSeg',S.hlStyle);seg('lineSideSeg',S.lineSide);seg('talkNarrAlignSeg',S.talkNarrAlign);
+  seg('bubStyleSeg',S.bubStyle);seg('diaColorSeg',S.diaColor);seg('quoteStyleSeg',S.quoteStyle);seg('quoteFollowSeg',S.quoteFollowSide);seg('hlStyleSeg',S.hlStyle);seg('barModeSeg',S.barMode);
+  $('barColorField').style.display=S.barMode==='fixed'?'flex':'none';seg('lineSideSeg',S.lineSide);seg('talkNarrAlignSeg',S.talkNarrAlign);
   seg('frameSeg',S.frame);seg('signAlignSeg',S.signAlign);seg('pageNumSeg',S.pageNum);
   seg('titleRuleSeg',S.titleRule);seg('signRuleSeg',S.signRule);seg('quoteLineSeg',S.quoteLine);seg('signSepSeg',S.signSep);
   $('sepCustomField').style.display=S.signSep==='custom'?'flex':'none';
@@ -1836,7 +1876,7 @@ $('modeHint').textContent=MODE_HINT[S.mode];
  'showNameSeg:showName','bubBorderSeg:bubBorder','frameSeg:frame','signAlignSeg:signAlign',
  'pageNumSeg:pageNum','formatSeg:format','bgModeSeg:bgMode','titleRuleSeg:titleRule',
  'signRuleSeg:signRule','quoteLineSeg:quoteLine','signSepSeg:signSep','transSeg:transparent','bubStyleSeg:bubStyle','diaColorSeg:diaColor',
- 'quoteStyleSeg:quoteStyle','quoteFollowSeg:quoteFollowSide','hlStyleSeg:hlStyle','lineSideSeg:lineSide','talkNarrAlignSeg:talkNarrAlign'].forEach(p=>{
+ 'quoteStyleSeg:quoteStyle','quoteFollowSeg:quoteFollowSide','hlStyleSeg:hlStyle','barModeSeg:barMode','lineSideSeg:lineSide','talkNarrAlignSeg:talkNarrAlign'].forEach(p=>{
   const [id,k]=p.split(':');
   [...$(id).children].forEach(c=>{let cv=c.dataset.v;if(cv==='on')cv=true;if(cv==='off')cv=false;
     c.classList.toggle('active',String(cv)===String(S[k]));});
