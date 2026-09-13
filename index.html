@@ -1771,12 +1771,12 @@ function bindRange(id,key,fmt,after){
 }
 function bindColor(id,key){const el=$(id);if(!el)return;el.addEventListener('input',()=>{S[key]=el.value;renderAll();});}
 function bindText(id,key){const el=$(id);if(!el)return;el.addEventListener('input',()=>{S[key]=el.value;renderAll();});}
+const BOOLSEG={showNameSeg:1,bubBorderSeg:1,transSeg:1,gkIndentSaySeg:1,quoteFollowSeg:1};
 function bindSeg(id,key,after){
   const el=$(id);if(!el)return;
   el.addEventListener('click',e=>{
     const b=e.target.closest('button');if(!b)return;
-    let v=b.dataset.v;
-    if(v==='on')v=true;if(v==='off')v=false;
+    const v=BOOLSEG[id]?(b.dataset.v==='on'):b.dataset.v;
     S[key]=v;
     [...el.children].forEach(c=>c.classList.remove('active'));b.classList.add('active');
     if(after)after();
@@ -2059,7 +2059,7 @@ set('frameInset',S.frameInset,S.frameInset);
   $('cw').value=S.cw;$('ch').value=S.ch;
   $('customRatio').style.display=S.ratio==='custom'?'block':'none';
   const seg=(id,val)=>{if($(id))[...$(id).children].forEach(c=>{
-    let cv=c.dataset.v;if(cv==='on')cv=true;if(cv==='off')cv=false;
+    const cv=BOOLSEG[id]?(c.dataset.v==='on'):c.dataset.v;
     c.classList.toggle('active',String(cv)===String(val));});};
   seg('modeSeg',S.mode);seg('gkBaseSeg',S.gkBase);seg('gkIndentSaySeg',S.gkIndentSay);seg('ratioSeg',S.ratio);seg('bodyYSeg',S.bodyY);seg('titleModeSeg',S.titleMode);seg('alignSeg',S.align);
   seg('novelLabelSeg',S.novelLabel);seg('showNameSeg',S.showName);seg('bubBorderSeg',S.bubBorder);
@@ -2471,7 +2471,8 @@ gkBaseUI();
  'signRuleSeg:signRule','signRuleScopeSeg:signRuleScope','cornerSeg:cornerMark','dividerSeg:dividerMark','dropcapSeg:dropcap','quoteLineSeg:quoteLine','signSepSeg:signSep','transSeg:transparent','bubStyleSeg:bubStyle','diaColorSeg:diaColor',
  'quoteStyleSeg:quoteStyle','quoteFollowSeg:quoteFollowSide','hlStyleSeg:hlStyle','barModeSeg:barMode','lineSideSeg:lineSide','talkNarrAlignSeg:talkNarrAlign'].forEach(p=>{
   const [id,k]=p.split(':');
-  [...$(id).children].forEach(c=>{let cv=c.dataset.v;if(cv==='on')cv=true;if(cv==='off')cv=false;
+  [...$(id).children].forEach(c=>{
+    const cv=BOOLSEG[id]?(c.dataset.v==='on'):c.dataset.v;
     c.classList.toggle('active',String(cv)===String(S[k]));});
 });
 setScale(S.scale);buildGradChips();renderAll();renderStkList();refreshPresets();refreshCasts();histInit();
