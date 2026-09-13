@@ -1480,7 +1480,13 @@ function renderGenko(rows,wrap){
         +`border:${lw}px solid ${gcol};margin:0 -${lw}px -${lw}px 0;`
         +`display:flex;align-items:center;justify-content:center;overflow:hidden;line-height:1;`
         +`font-size:${Math.round(size*S.gkScale)}px;color:${r.color||S.cText}`;
-      const d=(r.cells||[])[i];
+      const cells=r.cells||[];
+      const d=cells[i];
+      const isHl=x=>!!(x&&(x.h||(x.extra&&x.extra.h)));
+      if(isHl(d)){
+        const bg=hexToRgba(S.cHl,S.hlOp);
+        c.style.cssText+=';'+hlCss(bg,S.hlStyle||'full',!isHl(cells[i-1]),!isHl(cells[i+1]));
+      }
       if(d&&d.c){
         if(d.extra)c.style.fontSize=Math.round(size*S.gkScale*.62)+'px';
         [d,d.extra].forEach(x=>{
@@ -1490,7 +1496,6 @@ function renderGenko(rows,wrap){
           if(x.b)sp.style.fontWeight='700';
           if(x.i)sp.style.fontStyle='italic';
           if(x.s)sp.style.textDecoration='line-through';
-          if(x.h)sp.style.background=hexToRgba(S.cHl,S.hlOp);
           c.appendChild(sp);
         });
       }
