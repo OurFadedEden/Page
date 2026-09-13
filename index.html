@@ -159,6 +159,7 @@ s{text-decoration-thickness:.06em;text-underline-offset:.1em}
   color:var(--muted);padding:8px 12px;font-size:11.5px;letter-spacing:.04em;white-space:nowrap}
 .tabs button:hover{color:var(--text)}
 .tabs button.active{background:var(--ink-3);border-color:var(--line);color:var(--brass)}
+.tabs-hint{font-size:10px;color:var(--muted);opacity:.7;margin:-6px 0 10px;text-align:right}
 .pane{display:none}
 .pane.on{display:block}
 .subhead{font-size:10.5px;letter-spacing:.1em;color:var(--brass);opacity:.85;
@@ -281,6 +282,7 @@ table.gd code{display:inline-block;margin:1px 2px 1px 0}
   <div class="panel">
 
     <div class="tabs" id="tabs"><button data-t="layout">판형</button><button data-t="script">원고</button><button data-t="speak">화자</button><button data-t="type">글자</button><button data-t="bg">배경</button><button data-t="deco">꾸밈</button><button data-t="stk">스티커</button><button data-t="out">내보내기</button></div>
+<p class="tabs-hint">← → 키로 탭을 넘길 수 있어요</p>
 <section class="pane" data-t="layout"><div class="sec-in">
         <div class="field"><label>형식</label>
           <div class="seg" id="modeSeg">
@@ -2450,12 +2452,36 @@ $('stkDel').addEventListener('click',()=>{
 /* ---------- 탭 ---------- */
 (function(){
   const tabs=$('tabs');
+  const keys=[...tabs.children].map(b=>b.dataset.t);
   const go=k=>{
     [...tabs.children].forEach(b=>b.classList.toggle('active',b.dataset.t===k));
     document.querySelectorAll('.pane').forEach(p=>p.classList.toggle('on',p.dataset.t===k));
     document.querySelector('.panel').scrollTop=0;
+    const btn=[...tabs.children].find(b=>b.dataset.t===k);
+    if(btn&&btn.scrollIntoView)btn.scrollIntoView({block:'nearest',inline:'center',behavior:'smooth'});
+  };
+  const cur=()=>{
+    const a=[...tabs.children].findIndex(b=>b.classList.contains('active'));
+    return a<0?0:a;
+  };
+  const step=d=>{
+    const n=(cur()+d+keys.length)%keys.length;
+    go(keys[n]);
   };
   tabs.addEventListener('click',e=>{const b=e.target.closest('button');if(b)go(b.dataset.t);});
+  tabs.addEventListener('wheel',e=>{
+    if(Math.abs(e.deltaY)<=Math.abs(e.deltaX))return;
+    e.preventDefault();tabs.scrollLeft+=e.deltaY;
+  },{passive:false});
+  document.addEventListener('keydown',e=>{
+    if(e.ctrlKey||e.metaKey||e.altKey)return;
+    if(e.key!=='ArrowLeft'&&e.key!=='ArrowRight')return;
+    const t=e.target,tag=(t.tagName||'').toLowerCase();
+    if(tag==='input'||tag==='textarea'||tag==='select'||t.isContentEditable)return;
+    if(document.querySelector('.modal.on'))return;
+    e.preventDefault();
+    step(e.key==='ArrowRight'?1:-1);
+  });
   go('layout');
 })();
 
