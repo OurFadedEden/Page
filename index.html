@@ -510,6 +510,9 @@ table.gd code{display:inline-block;margin:1px 2px 1px 0}
           </div></div>
         <div class="field" id="barColorField" style="display:none"><label>세로선 색</label>
           <input type="color" id="barColor" value="#c8a45c"></div>
+        <div class="field"><label>대사 따옴표</label>
+          <div class="seg" id="diaQuoteSeg">
+            <button data-v="on">붙임</button><button data-v="off">뺌</button></div></div>
         <div class="field"><label>대사를 화자 위치에 맞추기</label>
           <div class="seg" id="quoteFollowSeg">
             <button data-v="off">모두 왼쪽</button><button data-v="on">화자 위치 따라</button>
@@ -894,6 +897,7 @@ table.gd code{display:inline-block;margin:1px 2px 1px 0}
 <tr><td>글꼴</td><td>명조·고딕·픽셀 중에. 갖고 있는 ttf·otf 파일을 올려 쓸 수도 있습니다</td></tr>
 <tr><td>대사 색 기준</td><td><b>화자 색 따라가기</b>를 켜면 인용·내지·로그에서도 대사 글자가 화자 색으로 나옵니다</td></tr>
 <tr><td>대사 모양</td><td>인용·내지 전용. 그대로 · 세로선 · 들여쓰기 · 배경 칠</td></tr>
+<tr><td>대사 따옴표</td><td><b>붙임</b>이면 따옴표가 없는 대사에 자동으로 붙이고, <b>뺌</b>이면 앞뒤 따옴표를 지웁니다. 세로선이나 배경 칠로 대사를 구분할 때 따옴표를 빼면 깔끔합니다</td></tr>
 <tr><td>화자 위치에 맞추기</td><td>켜면 인용·내지에서도 오른쪽 화자의 세로선이 오른쪽에 서고 글자가 오른쪽으로 붙습니다</td></tr>
 <tr><td>크기 · 행간 · 자간</td><td>본문 기준값입니다. 제목·서명·소제목은 여기에 비례해 커지고 작아집니다</td></tr>
 <tr><td>정렬</td><td>왼쪽·가운데·오른쪽·양끝. 대화와 로그 판형에서는 대사 줄에 적용되지 않습니다</td></tr>
@@ -1048,7 +1052,7 @@ const DEFAULTS=()=>({
   titleY:0, signX:0, signY:0, barMode:'auto', barColor:'#c8a45c', tsize:1.3, shadow:0,
   spk:{}, novelLabel:'none',
   bubRad:22, bubOp:.9, avSize:56, showName:true, bubBorder:true,
-  bubMax:74, bubStyle:'fill', diaColor:'fixed', quoteStyle:'plain', quoteFollowSide:false, lineSide:'left', talkNarrAlign:'center',
+  bubMax:74, bubStyle:'fill', diaColor:'fixed', quoteStyle:'plain', quoteFollowSide:false, diaQuote:'on', lineSide:'left', talkNarrAlign:'center',
   bgMode:'gradient', gradFrom:'#ffe19a', gradMid:'#5a93a8', gradTo:'#13314a',
   gradAngle:165, gradPreset:'\ucb4c', bgSolid:'#141019',
   paperColor:'#efe7d8', paperGrain:.4,
@@ -1135,6 +1139,10 @@ function inline(s){
   h=h.replace(/(^|[^*])\*([^*][\s\S]*?)\*(?!\*)/g,'$1<i>$2</i>');
   h=h.replace(/==([\s\S]+?)==/g,(m,inner)=>hlWrap(inner));
   return h;
+}
+function stripQuotes(t){
+  const m=String(t).match(/^((?:==|~~|\*\*|\*)*)["\u201c\u300c\u300e]([\s\S]*)["\u201d\u300d\u300f]((?:==|~~|\*\*|\*)*)$/);
+  return m?(m[1]+m[2]+m[3]):t;
 }
 const QUOTED=/^["\u201c\u300c\u300e]/;
 
@@ -1224,7 +1232,8 @@ function blockEl(b){
     else if(S.quoteStyle==='block'){d.style.background=hexToRgba(bcol,.13);d.style.padding='.45em .7em';d.style.borderRadius=Math.round(S.fsize*.16)+'px';}
     if(S.quoteFollowSide&&b.t==='say'&&b.who)d.style.textAlign=sd==='center'?'center':sd;
     let body=b.text;
-    if(!QUOTED.test(body.replace(/^(?:==|~~|\*\*)+/,'')))body='"'+body+'"';
+    if(S.diaQuote==='off')body=stripQuotes(body);
+    else if(!QUOTED.test(body.replace(/^(?:==|~~|\*\*)+/,'')))body='"'+body+'"';
     let html=inline(body);
     if(S.novelLabel==='inline'&&b.t==='say'&&!b.anon){
       html=`<span class="b-name" style="color:${spkOf(b.who).nmColor||col}">${esc(b.who)}</span>`+html;
@@ -1412,7 +1421,8 @@ function genkoRows(blocks){
     indent=Math.max(0,Math.min(6,Math.round(indent)));
     if(b.t==='say'||b.t==='line'){
       color=(S.diaColor==='speaker'&&b.who)?spkOf(b.who).color:S.cDia;
-      if(!QUOTED.test(text.replace(/^(?:==|~~|\*\*)+/,'')))text='"'+text+'"';
+      if(S.diaQuote==='off')text=stripQuotes(text);
+      else if(!QUOTED.test(text.replace(/^(?:==|~~|\*\*)+/,'')))text='"'+text+'"';
       if(S.novelLabel==='inline'&&b.t==='say'&&!b.anon)text=b.who+' '+text;
     }
     if(b.t==='head'){color=S.cHead;}
@@ -1821,6 +1831,7 @@ bindSeg('bubStyleSeg','bubStyle');
 bindSeg('diaColorSeg','diaColor');
 bindSeg('quoteStyleSeg','quoteStyle');
 bindSeg('quoteFollowSeg','quoteFollowSide');
+bindSeg('diaQuoteSeg','diaQuote');
 bindSeg('barModeSeg','barMode',()=>{$('barColorField').style.display=S.barMode==='fixed'?'flex':'none';});
 bindSeg('lineSideSeg','lineSide');
 bindSeg('talkNarrAlignSeg','talkNarrAlign');
@@ -2070,7 +2081,7 @@ set('frameInset',S.frameInset,S.frameInset);
     c.classList.toggle('active',String(cv)===String(val));});};
   seg('modeSeg',S.mode);seg('gkBaseSeg',S.gkBase);seg('gkIndentSaySeg',S.gkIndentSay);seg('ratioSeg',S.ratio);seg('bodyYSeg',S.bodyY);seg('titleModeSeg',S.titleMode);seg('alignSeg',S.align);
   seg('novelLabelSeg',S.novelLabel);seg('showNameSeg',S.showName);seg('bubBorderSeg',S.bubBorder);
-  seg('bubStyleSeg',S.bubStyle);seg('diaColorSeg',S.diaColor);seg('quoteStyleSeg',S.quoteStyle);seg('quoteFollowSeg',S.quoteFollowSide);seg('hlStyleSeg',S.hlStyle);seg('barModeSeg',S.barMode);
+  seg('bubStyleSeg',S.bubStyle);seg('diaColorSeg',S.diaColor);seg('quoteStyleSeg',S.quoteStyle);seg('quoteFollowSeg',S.quoteFollowSide);seg('diaQuoteSeg',S.diaQuote);seg('hlStyleSeg',S.hlStyle);seg('barModeSeg',S.barMode);
   $('barColorField').style.display=S.barMode==='fixed'?'flex':'none';seg('lineSideSeg',S.lineSide);seg('talkNarrAlignSeg',S.talkNarrAlign);
   seg('frameSeg',S.frame);seg('cornerSeg',S.cornerMark);seg('dividerSeg',S.dividerMark);seg('dropcapSeg',S.dropcap);
   $('cornerCustomField').style.display=S.cornerMark==='custom'?'flex':'none';
@@ -2500,7 +2511,7 @@ gkBaseUI();
  'showNameSeg:showName','bubBorderSeg:bubBorder','frameSeg:frame','signAlignSeg:signAlign',
  'pageNumSeg:pageNum','formatSeg:format','bgModeSeg:bgMode','titleRuleSeg:titleRule',
  'signRuleSeg:signRule','signRuleScopeSeg:signRuleScope','cornerSeg:cornerMark','dividerSeg:dividerMark','dropcapSeg:dropcap','quoteLineSeg:quoteLine','signSepSeg:signSep','transSeg:transparent','bubStyleSeg:bubStyle','diaColorSeg:diaColor',
- 'quoteStyleSeg:quoteStyle','quoteFollowSeg:quoteFollowSide','hlStyleSeg:hlStyle','barModeSeg:barMode','lineSideSeg:lineSide','talkNarrAlignSeg:talkNarrAlign'].forEach(p=>{
+ 'quoteStyleSeg:quoteStyle','quoteFollowSeg:quoteFollowSide','diaQuoteSeg:diaQuote','hlStyleSeg:hlStyle','barModeSeg:barMode','lineSideSeg:lineSide','talkNarrAlignSeg:talkNarrAlign'].forEach(p=>{
   const [id,k]=p.split(':');
   [...$(id).children].forEach(c=>{
     const cv=BOOLSEG[id]?(c.dataset.v==='on'):c.dataset.v;
