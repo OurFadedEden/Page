@@ -1221,6 +1221,7 @@ function blockEl(b){
     d.className='b-say';
     const col=(S.diaColor==='speaker'&&b.t==='say'&&b.who)?spkOf(b.who).color:S.cDia;
     d.style.setProperty('--c-dia',col);
+    if(S.diaQuote==='off')d.style.color=col;
     const sd=(S.quoteFollowSide&&b.t==='say'&&b.who)?(spkOf(b.who).side||'left'):'left';
     const w=Math.max(2,Math.round(S.fsize*.07));
     const bcol=S.barMode==='fixed'?S.barColor:col;
@@ -1319,9 +1320,15 @@ function logEl(b){
   const d=document.createElement('div');d.className='lg';
   const tag=document.createElement('span');tag.className='tag';
   const bd=document.createElement('span');bd.className='bd';
-  if(b.t==='say'){const sp=spkOf(b.who);tag.textContent='['+b.who+']';tag.style.color=sp.nmColor||sp.color;bd.innerHTML=inline(b.text);
-    bd.style.setProperty('--c-dia',S.diaColor==='speaker'?sp.color:S.cDia);}
-  else if(b.t==='line'){tag.textContent='\u300c\u300d';tag.style.color=S.cDia;bd.innerHTML=inline(b.text);bd.style.setProperty('--c-dia',S.cDia);}
+  if(b.t==='say'){const sp=spkOf(b.who);tag.textContent='['+b.who+']';tag.style.color=sp.nmColor||sp.color;
+    const dc=S.diaColor==='speaker'?sp.color:S.cDia;
+    bd.innerHTML=inline(S.diaQuote==='off'?stripQuotes(b.text):b.text);
+    bd.style.setProperty('--c-dia',dc);
+    if(S.diaQuote==='off')bd.style.color=dc;}
+  else if(b.t==='line'){tag.textContent='\u300c\u300d';tag.style.color=S.cDia;
+    bd.innerHTML=inline(S.diaQuote==='off'?stripQuotes(b.text):b.text);
+    bd.style.setProperty('--c-dia',S.cDia);
+    if(S.diaQuote==='off')bd.style.color=S.cDia;}
   else{d.className='lg narr';tag.textContent='\u203a';bd.innerHTML=inline(b.text);}
   d.appendChild(tag);d.appendChild(bd);return d;
 }
