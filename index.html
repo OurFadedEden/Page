@@ -319,13 +319,21 @@ table.gd code{display:inline-block;margin:1px 2px 1px 0}
           <div class="subhead" style="margin-top:0">원고지 설정</div>
           <div class="field"><label>칸 크기 기준</label>
             <div class="seg" id="gkBaseSeg">
-              <button data-v="cols">칸 수로</button><button data-v="fsize">글자 크기로</button></div></div>
+              <button data-v="cols">칸 수로</button><button data-v="fsize">글자 크기로</button>
+              <button data-v="auto">글 길이에 맞춤</button></div></div>
+          <div class="field"><label>칸 정렬</label>
+            <div class="seg" id="gkAlignSeg">
+              <button data-v="left">왼쪽</button><button data-v="center">가운데</button>
+              <button data-v="right">오른쪽</button></div></div>
           <div class="field" id="gkColsField"><label>한 줄 칸 수 <span class="v" id="gkColsV">20</span></label>
             <input type="range" id="gkCols" min="8" max="30" step="1" value="20"></div>
           <p class="hint" id="gkBaseHint"></p>
           <div class="field"><label>문단 들여쓰기 <span class="v" id="gkIndentV">1칸</span></label>
             <input type="range" id="gkIndent" min="0" max="4" step="1" value="1"></div>
-          <div class="field"><label>대사도 들여쓸까요</label>
+          <div class="field"><label>지문 들여쓰기</label>
+            <div class="seg" id="gkIndentNarrSeg">
+              <button data-v="on">들여씀</button><button data-v="off">안 들여씀</button></div></div>
+          <div class="field"><label>대사 들여쓰기</label>
             <div class="seg" id="gkIndentSaySeg">
               <button data-v="on">들여씀</button><button data-v="off">안 들여씀</button></div></div>
           <div class="field"><label>줄 사이 <span class="v" id="gkGapV">14</span></label>
@@ -857,7 +865,7 @@ table.gd code{display:inline-block;margin:1px 2px 1px 0}
 <tr><td>대화</td><td>메신저 말풍선. 화자별 색·좌우·프로필을 쓰고, 같은 사람이 연달아 말하면 프로필과 이름표를 생략합니다. 지문은 말풍선 없이 전체 폭으로 깔립니다</td></tr>
 <tr><td>내지</td><td>소설 지면. 대사는 따옴표와 색으로만 구분하고, 분량이 넘치면 여러 장으로 나눕니다</td></tr>
 <tr><td>로그</td><td><code>[이름] 대사</code> 형태로 한 줄씩 쌓입니다. 상태창이나 기록물 느낌</td></tr>
-<tr><td>원고지</td><td>한 글자가 한 칸에 들어갑니다. 칸 크기는 <b>칸 수로</b> 정하거나 <b>글자 크기로</b> 정합니다. 문단 들여쓰기는 0~4칸 중에 고르고 대사만 따로 뺄 수도 있습니다. 줄 끝에 오는 마침표·닫는 따옴표는 마지막 칸에 같이 넣습니다. 칸 수만 정하면 칸 크기와 줄 수는 지면에 맞춰 자동으로 잡힙니다. 굵게·기울임·취소선·형광펜은 글자별로 적용되고, 말풍선과 프로필은 쓰이지 않습니다</td></tr>
+<tr><td>원고지</td><td>한 글자가 한 칸에 들어갑니다. 칸 크기는 <b>칸 수로</b>, <b>글자 크기로</b>, 또는 <b>글 길이에 맞춤</b>(원고에서 가장 긴 줄만큼만 칸을 만듦) 중에 고릅니다. 칸 묶음은 왼쪽·가운데·오른쪽으로 정렬합니다. 들여쓰기는 0~4칸 중에 고르고 지문과 대사를 각각 켜고 끕니다. 줄 끝에 오는 마침표·닫는 따옴표는 마지막 칸에 같이 넣습니다. 칸 수만 정하면 칸 크기와 줄 수는 지면에 맞춰 자동으로 잡힙니다. 굵게·기울임·취소선·형광펜은 글자별로 적용되고, 말풍선과 프로필은 쓰이지 않습니다</td></tr>
 </table>
 
 <div class="subhead">판형 탭</div>
@@ -1058,7 +1066,7 @@ const DEFAULTS=()=>({
   paperColor:'#efe7d8', paperGrain:.4,
   bgImage:null, bgBlur:0, bgPosX:50, bgPosY:50, bgZoom:100,
   ovColor:'#0f0b14', ovOpacity:.3,
-  gkBase:'cols', gkCols:20, gkGap:14, gkIndent:1, gkIndentSay:true, gkLine:1, gkColor:'#c8a45c', gkOp:.35, gkScale:.78,
+  gkBase:'cols', gkAlign:'center', gkCols:20, gkGap:14, gkIndent:1, gkIndentSay:true, gkIndentNarr:true, gkLine:1, gkColor:'#c8a45c', gkOp:.35, gkScale:.78,
   frame:'none', frameColor:'#c8a45c', frameInset:28,
   cornerMark:'none', cornerCustom:'', cornerColor:'#c8a45c', cornerSize:.6, cornerInset:44,
   dividerMark:'\u2767', dividerCustom:'', dividerColor:'#c8a45c', dividerSize:.7, dividerGap:1,
@@ -1424,7 +1432,7 @@ function genkoRows(blocks){
     let text=b.text||'';
     const isSay=(b.t==='say'||b.t==='line');
     let color=S.cText;
-    let indent=isSay?(S.gkIndentSay?S.gkIndent:0):S.gkIndent;
+    let indent=isSay?(S.gkIndentSay?S.gkIndent:0):(S.gkIndentNarr?S.gkIndent:0);
     indent=Math.max(0,Math.min(6,Math.round(indent)));
     if(b.t==='say'||b.t==='line'){
       color=(S.diaColor==='speaker'&&b.who)?spkOf(b.who).color:S.cDia;
@@ -1448,12 +1456,31 @@ function genkoRows(blocks){
   });
   return rows;
 }
+let _gkAuto=0;
+function gkAutoCols(blocks){
+  let m=1;
+  (blocks||[]).forEach(b=>{
+    if(b.t!=='narr'&&b.t!=='say'&&b.t!=='line'&&b.t!=='head')return;
+    const isSay=(b.t==='say'||b.t==='line');
+    let t=b.text||'';
+    if(isSay){
+      if(S.diaQuote==='off')t=stripQuotes(t);
+      else if(!QUOTED.test(t.replace(/^(?:==|~~|\*\*)+/,'')))t='"'+t+'"';
+    }
+    const ind=isSay?(S.gkIndentSay?S.gkIndent:0):(S.gkIndentNarr?S.gkIndent:0);
+    const n=styledChars(t).length+Math.max(0,Math.round(ind));
+    if(n>m)m=n;
+  });
+  return Math.max(1,Math.min(60,m));
+}
 function gkMetrics(){
   const [W]=dims();
   const inner=W-S.pad*2;
-  if(S.gkBase==='fsize'){
+  if(S.gkBase==='fsize'||S.gkBase==='auto'){
     const size=Math.max(10,Math.round(S.fsize/Math.max(.3,S.gkScale)));
-    return {size:size,cols:Math.max(1,Math.floor(inner/size))};
+    const fit=Math.max(1,Math.floor(inner/size));
+    if(S.gkBase==='auto')return {size:size,cols:Math.max(1,Math.min(fit,_gkAuto||fit))};
+    return {size:size,cols:fit};
   }
   const cols=Math.max(4,Math.round(S.gkCols));
   return {size:Math.floor(inner/cols),cols:cols};
@@ -1464,6 +1491,7 @@ function paginateGenko(blocks){
   const headH=$('sheetHead').offsetHeight;
   $('sheetFoot').innerHTML=footHTML(0,1);
   const footH=$('sheetFoot').offsetHeight;
+  _gkAuto=gkAutoCols(blocks);
   const size=gkMetrics().size,gap=Math.round(S.gkGap);
   const rows=genkoRows(blocks);
   const cap=i=>Math.max(1,Math.floor(((H-S.pad*2-footH-((S.titleMode==='all'||(S.titleMode==='first'&&i===0))?headH:0))+gap)/(size+gap)));
@@ -1484,7 +1512,8 @@ function renderGenko(rows,wrap){
   wrap.style.fontFamily=S.font;
   (rows||[]).forEach(r=>{
     const row=document.createElement('div');
-    row.style.cssText=`display:flex;justify-content:center;margin-bottom:${gap}px`;
+    const jc=S.gkAlign==='left'?'flex-start':(S.gkAlign==='right'?'flex-end':'center');
+    row.style.cssText=`display:flex;justify-content:${jc};margin-bottom:${gap}px`;
     if(r.div){
       row.style.cssText+=`;height:${size}px;align-items:center;justify-content:center;`
         +`color:${S.dividerColor};font-size:${Math.round(size*.7)}px;letter-spacing:.4em`;
@@ -1795,7 +1824,7 @@ function bindRange(id,key,fmt,after){
 }
 function bindColor(id,key){const el=$(id);if(!el)return;el.addEventListener('input',()=>{S[key]=el.value;renderAll();});}
 function bindText(id,key){const el=$(id);if(!el)return;el.addEventListener('input',()=>{S[key]=el.value;renderAll();});}
-const BOOLSEG={showNameSeg:1,bubBorderSeg:1,transSeg:1,gkIndentSaySeg:1,quoteFollowSeg:1};
+const BOOLSEG={showNameSeg:1,bubBorderSeg:1,transSeg:1,gkIndentSaySeg:1,gkIndentNarrSeg:1,quoteFollowSeg:1};
 function bindSeg(id,key,after){
   const el=$(id);if(!el)return;
   el.addEventListener('click',e=>{
@@ -1869,9 +1898,11 @@ $('script').addEventListener('input',()=>{S.script=$('script').value;renderAll()
 
 bindRange('pad','pad',v=>v);
 bindSeg('gkBaseSeg','gkBase',()=>{gkBaseUI();});
+bindSeg('gkAlignSeg','gkAlign');
 bindRange('gkCols','gkCols',v=>v);
 bindRange('gkIndent','gkIndent',v=>v+'칸');
-bindSeg('gkIndentSaySeg','gkIndentSay');bindRange('gkGap','gkGap',v=>v);
+bindSeg('gkIndentSaySeg','gkIndentSay');
+bindSeg('gkIndentNarrSeg','gkIndentNarr');bindRange('gkGap','gkGap',v=>v);
 bindRange('gkOp','gkOp',v=>Math.round(v*100)+'%');bindRange('gkLine','gkLine',v=>v);
 bindRange('gkScale','gkScale',v=>v.toFixed(2)+'\u00d7');
 bindRange('fsize','fsize',v=>v);
@@ -1939,11 +1970,12 @@ $('fontFile').addEventListener('change',e=>{
 
 /* 그라디언트 칩 */
 function gkBaseUI(){
-  const f=S.gkBase==='fsize';
-  $('gkColsField').style.display=f?'none':'flex';
-  $('gkBaseHint').textContent=f
-    ?'글자 탭의 크기와 아래 글자 크기 비율로 칸 크기가 정해지고, 칸 수는 지면에 들어가는 만큼 채워집니다.'
-    :'칸 수로 칸 크기가 정해지고, 글자는 칸에 맞춰 커집니다.';
+  $('gkColsField').style.display=S.gkBase==='cols'?'flex':'none';
+  $('gkBaseHint').textContent=S.gkBase==='auto'
+    ?'원고에서 가장 긴 줄(엔터 기준)만큼만 칸을 만듭니다. 칸 크기는 글자 크기를 따릅니다.'
+    :(S.gkBase==='fsize'
+      ?'글자 탭의 크기와 아래 글자 크기 비율로 칸 크기가 정해지고, 칸 수는 지면에 들어가는 만큼 채워집니다.'
+      :'칸 수로 칸 크기가 정해지고, 글자는 칸에 맞춰 커집니다.');
 }
 function buildGradChips(){
   const w=$('gradChips');w.innerHTML='';
@@ -2086,7 +2118,7 @@ set('frameInset',S.frameInset,S.frameInset);
   const seg=(id,val)=>{if($(id))[...$(id).children].forEach(c=>{
     const cv=BOOLSEG[id]?(c.dataset.v==='on'):c.dataset.v;
     c.classList.toggle('active',String(cv)===String(val));});};
-  seg('modeSeg',S.mode);seg('gkBaseSeg',S.gkBase);seg('gkIndentSaySeg',S.gkIndentSay);seg('ratioSeg',S.ratio);seg('bodyYSeg',S.bodyY);seg('titleModeSeg',S.titleMode);seg('alignSeg',S.align);
+  seg('modeSeg',S.mode);seg('gkBaseSeg',S.gkBase);seg('gkAlignSeg',S.gkAlign);seg('gkIndentSaySeg',S.gkIndentSay);seg('gkIndentNarrSeg',S.gkIndentNarr);seg('ratioSeg',S.ratio);seg('bodyYSeg',S.bodyY);seg('titleModeSeg',S.titleMode);seg('alignSeg',S.align);
   seg('novelLabelSeg',S.novelLabel);seg('showNameSeg',S.showName);seg('bubBorderSeg',S.bubBorder);
   seg('bubStyleSeg',S.bubStyle);seg('diaColorSeg',S.diaColor);seg('quoteStyleSeg',S.quoteStyle);seg('quoteFollowSeg',S.quoteFollowSide);seg('diaQuoteSeg',S.diaQuote);seg('hlStyleSeg',S.hlStyle);seg('barModeSeg',S.barMode);
   $('barColorField').style.display=S.barMode==='fixed'?'flex':'none';seg('lineSideSeg',S.lineSide);seg('talkNarrAlignSeg',S.talkNarrAlign);
@@ -2514,7 +2546,7 @@ $('script').value=S.script;
 $('modeHint').textContent=MODE_HINT[S.mode];
 $('gkCtrl').style.display=S.mode==='genko'?'flex':'none';
 gkBaseUI();
-['modeSeg:mode','ratioSeg:ratio','bodyYSeg:bodyY','gkBaseSeg:gkBase','gkIndentSaySeg:gkIndentSay','titleModeSeg:titleMode','alignSeg:align','novelLabelSeg:novelLabel',
+['modeSeg:mode','ratioSeg:ratio','bodyYSeg:bodyY','gkBaseSeg:gkBase','gkAlignSeg:gkAlign','gkIndentSaySeg:gkIndentSay','gkIndentNarrSeg:gkIndentNarr','titleModeSeg:titleMode','alignSeg:align','novelLabelSeg:novelLabel',
  'showNameSeg:showName','bubBorderSeg:bubBorder','frameSeg:frame','signAlignSeg:signAlign',
  'pageNumSeg:pageNum','formatSeg:format','bgModeSeg:bgMode','titleRuleSeg:titleRule',
  'signRuleSeg:signRule','signRuleScopeSeg:signRuleScope','cornerSeg:cornerMark','dividerSeg:dividerMark','dropcapSeg:dropcap','quoteLineSeg:quoteLine','signSepSeg:signSep','transSeg:transparent','bubStyleSeg:bubStyle','diaColorSeg:diaColor',
