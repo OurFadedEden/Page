@@ -77,7 +77,7 @@ input,select,textarea{font-family:inherit}
 .bg-layer{background-size:cover;background-position:center;z-index:0}
 .bg-overlay{z-index:1}
 .vig{z-index:2}
-.grain{z-index:3;background-repeat:repeat;mix-blend-mode:overlay}
+.grain{z-index:3;background-repeat:repeat}
 .frame-l{z-index:6}
 .stk-layer{position:absolute;inset:0;overflow:hidden;pointer-events:none}
 #stkBack{z-index:4}
@@ -669,8 +669,12 @@ table.gd code{display:inline-block;margin:1px 2px 1px 0}
         <div class="grid2">
           <div class="field"><label>비네트 <span class="v" id="vigV">35%</span></label>
             <input type="range" id="vig" min="0" max="1" step=".02" value=".35"></div>
-          <div class="field"><label>노이즈 <span class="v" id="grainV">0%</span></label>
+          <div class="field"><label>노이즈 <span class="v" id="grainAmtV">0%</span></label>
             <input type="range" id="grainAmt" min="0" max="1" step=".02" value="0"></div>
+        </div>
+        <div class="grid2">
+          <div class="field"><label>노이즈 입자 <span class="v" id="grainScaleV">1.00×</span></label>
+            <input type="range" id="grainScale" min=".5" max="4" step=".1" value="1"></div>
         </div>
       <div class="subhead">서명 · 쪽번호</div>
         <div class="grid2">
@@ -1043,7 +1047,7 @@ const DEFAULTS=()=>({
   frame:'none', frameColor:'#c8a45c', frameInset:28,
   cornerMark:'none', cornerCustom:'', cornerColor:'#c8a45c', cornerSize:.6, cornerInset:44,
   dividerMark:'\u2767', dividerCustom:'', dividerColor:'#c8a45c', dividerSize:.7, dividerGap:1,
-  dropcap:'off', dropcapLines:3, dropcapColor:'#e8c98a', vig:.35, grainAmt:0,
+  dropcap:'off', dropcapLines:3, dropcapColor:'#e8c98a', vig:.35, grainAmt:0, grainScale:1,
   sign:'', sign2:'', signSep:'\u00b7', signSepCustom:'', signColor:'#c8a45c', sepColor:'#c8a45c', signSize:.45, signAlign:'right', pageNum:'off',
   scale:2, format:'png', quality:.92, transparent:false, stickers:[]
 });
@@ -1054,10 +1058,18 @@ let PAGES=[[]], PG=0, blurredURL=null;
 function hexToRgba(h,a){h=(h||'#000').replace('#','');if(h.length===3)h=h.split('').map(c=>c+c).join('');
   const n=parseInt(h,16);return `rgba(${(n>>16)&255},${(n>>8)&255},${n&255},${a})`;}
 let _noise=null;
-function noiseURL(){if(_noise)return _noise;const c=document.createElement('canvas');c.width=c.height=96;
-  const x=c.getContext('2d'),im=x.createImageData(96,96);
-  for(let i=0;i<im.data.length;i+=4){const v=Math.random()*255;im.data[i]=im.data[i+1]=im.data[i+2]=v;im.data[i+3]=Math.random()*70;}
-  x.putImageData(im,0,0);_noise=c.toDataURL('image/png');return _noise;}
+function noiseURL(){
+  if(_noise)return _noise;
+  const c=document.createElement('canvas');c.width=c.height=128;
+  const x=c.getContext('2d'),im=x.createImageData(128,128);
+  for(let i=0;i<im.data.length;i+=4){
+    const dark=Math.random()<.5;
+    const v=dark?0:255;
+    im.data[i]=im.data[i+1]=im.data[i+2]=v;
+    im.data[i+3]=Math.random()*Math.random()*210;
+  }
+  x.putImageData(im,0,0);_noise=c.toDataURL('image/png');return _noise;
+}
 let _tt;function toast(m){const t=$('toast');t.textContent=m;t.classList.add('on');clearTimeout(_tt);_tt=setTimeout(()=>t.classList.remove('on'),1900);}
 const store={get(k){try{return JSON.parse(localStorage.getItem(k));}catch(e){return null;}},
   set(k,v){try{localStorage.setItem(k,JSON.stringify(v));return true;}catch(e){return false;}}};
@@ -1379,7 +1391,7 @@ function renderBg(){
   O.style.background=hexToRgba(S.ovColor,S.bgMode==='paper'?S.ovOpacity*.25:S.ovOpacity);
   const g=$('grain');
   const amt=S.bgMode==='paper'?Math.max(S.grainAmt,S.paperGrain):S.grainAmt;
-  if(amt>0){g.style.backgroundImage=`url(${noiseURL()})`;g.style.opacity=amt*.5;}
+  if(amt>0){g.style.backgroundImage=`url(${noiseURL()})`;g.style.backgroundSize=`${Math.round(128*S.grainScale)}px`;g.style.opacity=amt*.75;}
   else{g.style.backgroundImage='none';g.style.opacity=0;}
   const v=$('vigL');
   v.style.background=S.vig>0?`radial-gradient(120% 100% at 50% 50%, transparent 36%, rgba(0,0,0,${S.vig}) 100%)`:'none';
@@ -1902,6 +1914,7 @@ bindRange('dividerGap','dividerGap',v=>v.toFixed(2)+'\u00d7');
 bindRange('dropcapLines','dropcapLines',v=>v);
 bindRange('vig','vig',v=>Math.round(v*100)+'%');
 bindRange('grainAmt','grainAmt',v=>Math.round(v*100)+'%');
+bindRange('grainScale','grainScale',v=>v.toFixed(2)+'\u00d7');
 bindRange('signSize','signSize',v=>v.toFixed(2)+'\u00d7');
 bindRange('ruleWeight','ruleWeight',v=>v);
 bindRange('titleRuleWidth','titleRuleWidth',v=>v+'%');
@@ -2081,7 +2094,7 @@ set('frameInset',S.frameInset,S.frameInset);
   set('cornerSize',S.cornerSize,(+S.cornerSize).toFixed(2)+'\u00d7');set('cornerInset',S.cornerInset,S.cornerInset);
   set('dividerSize',S.dividerSize,(+S.dividerSize).toFixed(2)+'\u00d7');set('dividerGap',S.dividerGap,(+S.dividerGap).toFixed(2)+'\u00d7');
   set('dropcapLines',S.dropcapLines,S.dropcapLines);
-  set('vig',S.vig,Math.round(S.vig*100)+'%');set('grainAmt',S.grainAmt,Math.round(S.grainAmt*100)+'%');
+  set('vig',S.vig,Math.round(S.vig*100)+'%');set('grainAmt',S.grainAmt,Math.round(S.grainAmt*100)+'%');set('grainScale',S.grainScale,(+S.grainScale).toFixed(2)+'\u00d7');
   set('signSize',S.signSize,(+S.signSize).toFixed(2)+'\u00d7');
   set('ruleWeight',S.ruleWeight,S.ruleWeight);set('titleRuleWidth',S.titleRuleWidth,S.titleRuleWidth+'%');set('signRuleWidth',S.signRuleWidth,S.signRuleWidth+'%');set('signRuleX',S.signRuleX,S.signRuleX);set('quality',S.quality,Math.round(S.quality*100)+'%');
   set('bgPosX',S.bgPosX,S.bgPosX+'%');set('bgPosY',S.bgPosY,S.bgPosY+'%');set('bgZoom',S.bgZoom,S.bgZoom+'%');
