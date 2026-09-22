@@ -1215,7 +1215,9 @@ function blockEl(b){
     const col=(S.diaColor==='speaker'&&b.t==='say'&&b.who)?spkOf(b.who).color:S.cDia;
     d.style.setProperty('--c-dia',col);
     if(S.diaQuote==='off')d.style.color=col;
-    const sd=(S.quoteFollowSide&&b.t==='say'&&b.who)?(spkOf(b.who).side||'left'):'left';
+    const follow=(S.quoteFollowSide&&b.t==='say'&&b.who);
+    const sd=follow?(spkOf(b.who).side||'left')
+      :(S.align==='right'?'right':(S.align==='center'?'center':'left'));
     const w=Math.max(2,Math.round(S.fsize*.07));
     const bcol=S.barMode==='fixed'?S.barColor:col;
     if(S.quoteStyle==='bar'){
@@ -1224,7 +1226,12 @@ function blockEl(b){
     }
     else if(S.quoteStyle==='indent'){d.style[sd==='right'?'paddingRight':'paddingLeft']='1.6em';}
     else if(S.quoteStyle==='block'){d.style.background=hexToRgba(bcol,.13);d.style.padding='.45em .7em';d.style.borderRadius=Math.round(S.fsize*.16)+'px';}
-    if(S.quoteFollowSide&&b.t==='say'&&b.who)d.style.textAlign=sd==='center'?'center':sd;
+    if((S.quoteStyle==='bar'||S.quoteStyle==='block')&&sd!=='left'){
+      d.style.display='table';
+      d.style.marginLeft='auto';
+      d.style.marginRight=sd==='center'?'auto':'0';
+    }
+    if(follow||sd!=='left')d.style.textAlign=sd==='center'?'center':sd;
     let body=b.text;
     if(S.diaQuote==='off')body=stripQuotes(body);
     else if(!QUOTED.test(body.replace(/^(?:==|~~|\*\*)+/,'')))body='"'+body+'"';
