@@ -484,7 +484,7 @@ table.gd code{display:inline-block;margin:1px 2px 1px 0}
         <div class="field"><label>말풍선 모양</label>
           <div class="seg" id="bubStyleSeg">
             <button data-v="fill">채움</button><button data-v="outline">선만</button>
-            <button data-v="solid">진하게</button><button data-v="tail">꼬리</button>
+            <button data-v="solid">진하게</button><button data-v="tail">소프트</button>
             <button data-v="bar">세로선</button><button data-v="plain">글자만</button>
           </div></div>
         <div class="field"><label>모서리 <span class="v" id="bubRadV">22</span></label>
@@ -919,7 +919,7 @@ table.gd code{display:inline-block;margin:1px 2px 1px 0}
 <tr><td>화자 세트</td><td>이름·색·위치·프로필만 따로 저장합니다. 다른 발췌에서 불러오면 그대로 얹힙니다</td></tr>
 <tr><td>색 두 가지</td><td><b>말풍선</b>은 배경·프로필 원·세로선에, <b>이름</b>은 이름표와 로그의 <code>[이름]</code>에 쓰입니다. 이름 색을 한 번도 안 건드렸으면 말풍선 색을 따라가고, 직접 잡으면 그때부터 독립합니다</td></tr>
 <tr><td>같은 사람 연속</td><td>같은 화자가 연달아 말하면 프로필과 이름표를 생략해 한 덩어리로 보입니다</td></tr>
-<tr><td>말풍선 모양</td><td>채움 · 선만 · 진하게 · 꼬리 · 세로선 · 글자만. 전부 화자 색을 따라갑니다. 세로선은 오른쪽 화자면 선이 오른쪽에 섭니다</td></tr>
+<tr><td>말풍선 모양</td><td>채움 · 선만 · 진하게 · 소프트 · 세로선 · 글자만. 소프트는 꼬리 없이 화자 쪽 아래 모서리만 살짝 각지게 합니다. 말풍선과 대사 글자는 화자 색을 따라갑니다</td></tr>
 <tr><td>최대 너비</td><td>말풍선이 차지할 수 있는 최대 폭(40~100%). 좁히면 메신저처럼, 넓히면 문서처럼 보입니다</td></tr>
 <tr><td>모서리 · 불투명도</td><td>둥글기와 배경 진하기. <b>글자만</b>과 <b>세로선</b> 모양에서는 모서리가 적용되지 않습니다</td></tr>
 <tr><td>프로필 크기</td><td>0으로 두면 모든 화자의 프로필이 사라집니다. 한 명만 없애려면 그 화자 카드에서 숨김을 고릅니다</td></tr>
@@ -1174,9 +1174,9 @@ function hlWrap(t){
   });
   const texts=chunks.filter(c=>!c.tag);
   if(!texts.length)return t;
-  const first=texts[0],last=texts[texts.length-1];
-  return chunks.map(c=>c.tag?c.v:
-    `<span class='hl' style='${hlCss(bg,st,c===first,c===last)}'>${c.v}</span>`).join('');
+  // 화면에서는 강조 구간 전체를 하나로 감쌉니다(글자 단위로 쪼개면 사이가 떠 보임).
+  // 저장할 때만 splitHlByLine()이 줄 단위로 나눕니다.
+  return `<span class='hl' style='${hlCss(bg,st,true,true)}'>${chunks.map(c=>c.v).join('')}</span>`;
 }
 function inline(s){
   let h=esc(s);
@@ -1298,34 +1298,29 @@ function blockEl(b){
   _prevWho=null;
   d.className='b-narr';d.innerHTML=b.forced?`<i>${inline(b.text)}</i>`:inline(b.text);return d;
 }
-function styleBub(bu,color,side){
+function styleBub(bu,color,side,txt){
   const st=S.bubStyle;
+  const soft=(st==='tail'||st==='soft'); // 기존 저장값 tail도 그대로 호환
   bu.style.borderRadius=(st==='bar'||st==='plain')?'0':S.bubRad+'px';
-  bu.style.background='none';bu.style.border='none';bu.style.color='';
+  bu.style.background='none';bu.style.border='none';
+  // 대화 판형의 대사 글자도 말풍선 색을 그대로 따라가도록 명시합니다.
+  bu.style.color=txt||color;
   bu.style.padding=(st==='plain'||st==='bar')?'.15em 0':'.62em .9em';
-  if(st==='fill'||st==='tail'){
+  if(st==='fill'||soft){
     bu.style.background=hexToRgba(color,.26*S.bubOp);
     if(S.bubBorder)bu.style.border=`1px solid ${hexToRgba(color,.55*S.bubOp)}`;
+    // 꼬리 대신 화자 쪽 아래 모서리만 살짝 각지게 만들어 인접 말풍선과 겹치지 않게 합니다.
+    if(side==='left')bu.style.borderTopLeftRadius=Math.max(4,Math.round(S.bubRad*.22))+'px';
+    else if(side==='right')bu.style.borderTopRightRadius=Math.max(4,Math.round(S.bubRad*.22))+'px';
   }else if(st==='outline'){
     bu.style.border=`${Math.max(1,Math.round(S.fsize*.045))}px solid ${hexToRgba(color,.85*S.bubOp)}`;
   }else if(st==='solid'){
     bu.style.background=hexToRgba(color,S.bubOp);
-    bu.style.color='#17131a';
+    bu.style.color=txt||'#17131a';
   }else if(st==='bar'){
     const w=S.barW>0?Math.round(S.barW):Math.max(2,Math.round(S.fsize*.09)),c=hexToRgba(color,.9*S.bubOp);
     if(side==='right'){bu.style.borderRight=`${w}px solid ${c}`;bu.style.paddingRight='.7em';bu.style.textAlign='right';}
     else{bu.style.borderLeft=`${w}px solid ${c}`;bu.style.paddingLeft='.7em';}
-  }
-  if(st==='tail'&&side!=='center'){
-    const t=document.createElement('div');
-    const w=Math.max(7,Math.round(S.fsize*.24)),h=Math.max(5,Math.round(S.fsize*.17));
-    const c=hexToRgba(color,.26*S.bubOp);
-    const top=Math.round(Math.max(S.bubRad*.8,S.fsize*.45));
-    const off=w-1;
-    t.style.cssText=`position:absolute;top:${top}px;width:0;height:0;`+
-      `border-top:${h}px solid transparent;border-bottom:${h}px solid transparent;`+
-      (side==='right'?`right:-${off}px;border-left:${w}px solid ${c};`:`left:-${off}px;border-right:${w}px solid ${c};`);
-    bu.appendChild(t);
   }
 }
 function talkEl(b){
@@ -1345,7 +1340,9 @@ function talkEl(b){
     row.className='row';row.style.display='block';
     const bu=document.createElement('div');bu.className='bub narr-line';
     bu.style.cssText='background:none;border:none;box-shadow:none;padding:0;max-width:100%;';
-    bu.style.textAlign=a;bu.style.opacity='.78';bu.style.fontStyle='italic';
+    // 지문은 화자 색과 분리하고, 글자 탭의 「본문」 색을 그대로 사용합니다.
+    bu.style.color=S.cText;
+    bu.style.textAlign=a;bu.style.opacity='1';bu.style.fontStyle='italic';
     bu.innerHTML=inline(b.text);
     row.appendChild(bu);return row;
   }
@@ -1367,7 +1364,7 @@ function talkEl(b){
   const st=document.createElement('div');st.className='stack';st.style.maxWidth=(S.bubMax||74)+'%';
   if(S.showName&&!cont){const nm=document.createElement('div');nm.className='nm';nm.textContent=b.who;nm.style.color=sp.nmColor||sp.color;st.appendChild(nm);}
   const bu=document.createElement('div');bu.className='bub';
-  bu.innerHTML=inline(b.text);styleBub(bu,sp.color,sp.side||'left');
+  bu.innerHTML=inline(b.text);styleBub(bu,sp.color,sp.side||'left',sp.txtColor);
   st.appendChild(bu);row.appendChild(st);return row;
 }
 function logEl(b){
@@ -1848,6 +1845,11 @@ function renderSpeakerList(blocks){
       </div>
       <div class="spk-row"><span style="font-size:10.5px;color:var(--muted)">말풍선</span>
         <input type="color" data-a="color"></div>
+      <div class="spk-row"><span style="font-size:10.5px;color:var(--muted)">대사 글자</span>
+        <div style="display:flex;gap:6px;align-items:center">
+          <input type="color" data-a="txtColor" style="flex:1 1 auto">
+          <button class="btn ghost" data-a="txtAuto" style="width:auto;padding:5px 8px;font-size:10.5px;white-space:nowrap"></button>
+        </div></div>
       <div class="spk-row"><span style="font-size:10.5px;color:var(--muted)">이름</span>
         <input type="color" data-a="nmColor"></div>
       <div class="spk-row"><span style="font-size:10.5px;color:var(--muted)">위치</span>
@@ -1872,6 +1874,14 @@ function renderSpeakerList(blocks){
     col.addEventListener('input',()=>{const old=S.spk[n].color;
       if(!S.spk[n].nmColor||S.spk[n].nmColor===old)S.spk[n].nmColor=col.value;
       S.spk[n].color=col.value;renderAll();});
+    const tcol=card.querySelector('[data-a=txtColor]'),tauto=card.querySelector('[data-a=txtAuto]');
+    const follow=!sp.txtColor;
+    tcol.value=sp.txtColor||(S.bubStyle==='solid'?'#17131a':sp.color);
+    tcol.style.opacity=follow?.55:1;
+    tauto.textContent=follow?'따라가는 중':'따라가기';
+    tauto.classList.toggle('active',follow);
+    tcol.addEventListener('input',()=>{S.spk[n].txtColor=tcol.value;renderAll();});
+    tauto.addEventListener('click',()=>{delete S.spk[n].txtColor;renderAll();});
     const ncol=card.querySelector('[data-a=nmColor]');ncol.value=sp.nmColor||sp.color;
     ncol.addEventListener('input',()=>{S.spk[n].nmColor=ncol.value;renderAll();});
     card.querySelectorAll('[data-a=side] button').forEach(b=>{
@@ -2156,6 +2166,82 @@ function setScale(v){S.scale=parseInt(v);[...$('scaleSeg').children].forEach(c=>
 $('scaleSeg').addEventListener('click',e=>{const b=e.target.closest('button');if(b)setScale(b.dataset.v);});
 
 /* ---------- 내보내기 ---------- */
+/* 형광펜이 여러 줄에 걸치면 html2canvas가 한 덩어리 사각형으로 그려서 저장 오류가 납니다.
+   저장용 복제본에서만, 줄이 바뀌는 지점마다 형광펜 span을 따로 나눕니다(글자 단위 X → 줄 단위 O).
+   같은 줄 안에서는 span이 이어 붙어서 형광펜 사이에 틈이 생기지 않습니다. */
+function splitHlByLine(root){
+  const doc=root.ownerDocument;
+  const bg=hexToRgba(S.cHl,S.hlOp),st=S.hlStyle||'full';
+  const c=hexToRgba(S.cHl,Math.min(1,S.hlOp+.4));
+  const css=(lf,ll,gf,gl)=>{
+    if(st==='round'){
+      let r='';
+      if(lf)r+='border-top-left-radius:.45em;border-bottom-left-radius:.45em;';
+      if(ll)r+='border-top-right-radius:.45em;border-bottom-right-radius:.45em;';
+      if(gf)r+='padding-left:.2em;';
+      if(gl)r+='padding-right:.2em;';
+      return `background:${bg};${r}`;
+    }
+    if(st==='box'){
+      let b=`border-top:1px solid ${c};border-bottom:1px solid ${c};`;
+      if(lf)b+=`border-left:1px solid ${c};`;
+      if(ll)b+=`border-right:1px solid ${c};`;
+      if(gf)b+='padding-left:.2em;';
+      if(gl)b+='padding-right:.2em;';
+      return b;
+    }
+    if(st==='marker'||st==='under'){
+      // transparent 그라데이션 대신 같은 색 한 겹을 아래쪽에만 깔아서 윗가장자리 잔선을 없앱니다.
+      const pct=st==='marker'?54:16;
+      return `background-image:linear-gradient(${bg},${bg});background-repeat:no-repeat;background-position:0 100%;background-size:100% ${pct}%`;
+    }
+    return hlCss(bg,st,true,true);
+  };
+  const rng=doc.createRange();
+  root.querySelectorAll('span.hl').forEach(hl=>{
+    const walker=doc.createTreeWalker(hl,NodeFilter.SHOW_TEXT);
+    const nodes=[];let n;while((n=walker.nextNode()))nodes.push(n);
+    if(!nodes.length)return;
+    // 1) 글자별 줄 번호 계산 (DOM을 바꾸기 전에 전부 측정)
+    let line=0,anchor=null,anchorH=0;
+    const segs=[];
+    nodes.forEach(tn=>{
+      const t=tn.nodeValue;let cur=null;
+      for(let i=0;i<t.length;i++){
+        rng.setStart(tn,i);rng.setEnd(tn,i+1);
+        const r=rng.getBoundingClientRect();
+        if(r.width||r.height){
+          const mid=r.top+r.height/2;
+          if(anchor===null){anchor=mid;anchorH=r.height;}
+          else if(mid-anchor>anchorH*.6){line++;anchor=mid;anchorH=r.height;}
+        }
+        if(cur&&cur.line===line)cur.e=i+1;
+        else{cur={tn,s:i,e:i+1,line};segs.push(cur);}
+      }
+    });
+    if(!segs.length)return;
+    // 2) 줄마다 첫 조각 / 마지막 조각 표시
+    const firstOf={},lastOf={};
+    segs.forEach((g,i)=>{if(!(g.line in firstOf))firstOf[g.line]=i;lastOf[g.line]=i;});
+    // 3) 텍스트 노드를 줄 단위 span으로 교체
+    const byNode=new Map();
+    segs.forEach((g,i)=>{g.i=i;if(!byNode.has(g.tn))byNode.set(g.tn,[]);byNode.get(g.tn).push(g);});
+    byNode.forEach((list,tn)=>{
+      const t=tn.nodeValue,frag=doc.createDocumentFragment();
+      list.forEach(g=>{
+        const sp=doc.createElement('span');
+        sp.className='hl';
+        sp.style.cssText=css(firstOf[g.line]===g.i,lastOf[g.line]===g.i,g.i===0,g.i===segs.length-1);
+        sp.textContent=t.slice(g.s,g.e);
+        frag.appendChild(sp);
+      });
+      tn.parentNode.replaceChild(frag,tn);
+    });
+    // 4) 바깥 원본 span은 풀어줌
+    while(hl.firstChild)hl.parentNode.insertBefore(hl.firstChild,hl);
+    hl.remove();
+  });
+}
 async function shoot(){
   await (document.fonts?document.fonts.ready:Promise.resolve());
   const [w,h]=dims();
@@ -2165,7 +2251,8 @@ async function shoot(){
       s.style.left='0';s.style.top='0';s.style.margin='0';
       const m=doc.getElementById('measure');if(m)m.remove();
       doc.querySelectorAll('.stk').forEach(e=>{e.style.outline='none';e.classList.remove('sel');});
-      if(S.transparent){['bgLayer','bgOverlay','vigL','grain'].forEach(k=>{const e=doc.getElementById(k);if(e)e.style.display='none';});}}});
+      if(S.transparent){['bgLayer','bgOverlay','vigL','grain'].forEach(k=>{const e=doc.getElementById(k);if(e)e.style.display='none';});}
+      try{splitHlByLine(s);}catch(err){console.warn('highlight split failed',err);}}});
 }
 const ext=()=>S.format==='jpeg'?'jpg':S.format;
 const qual=()=>S.format==='png'?undefined:S.quality;
